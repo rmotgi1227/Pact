@@ -25,6 +25,8 @@ function fakeCtx() {
       replaceCommitments: vi.fn((dealId: string, cs: Commitment[]) => { replaced.push({ dealId, cs }); return cs; }),
     },
     llm: { embed: vi.fn().mockResolvedValue(vectors) },
+    decide: { choose: vi.fn().mockResolvedValue({ key: 'same', p: 0.9 }) },
+    log: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
     bus: { emit: vi.fn(async (topic: string, payload: unknown) => { emitted.push({ topic, payload }); }) },
   } as unknown as Ctx;
   return { ctx, emitted, replaced };

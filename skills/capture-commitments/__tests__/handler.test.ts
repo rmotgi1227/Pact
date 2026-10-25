@@ -22,6 +22,7 @@ function fakeCtx(items: { lineIndex: number; summary: string }[]) {
     },
     llm: { json: vi.fn().mockResolvedValue({ items }) },
     readPrompt: vi.fn().mockResolvedValue('system prompt'),
+    log: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   } as unknown as Ctx;
   return { ctx, saved };
 }
