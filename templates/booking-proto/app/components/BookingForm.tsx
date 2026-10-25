@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
-import { getVehicle } from '../../data/vehicles';
 
 const randomConfirmation = () => Math.random().toString(36).slice(2, 8).toUpperCase();
 
@@ -11,7 +10,6 @@ export function BookingForm({ vehicleId }: { vehicleId: string | null }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const vehicle = getVehicle(vehicleId);
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -26,14 +24,6 @@ export function BookingForm({ vehicleId }: { vehicleId: string | null }) {
 
   return (
     <form className="card" data-testid="booking-form" onSubmit={onSubmit}>
-      {vehicle && (
-        <div className="booking-summary">
-          <div className="booking-summary-name">{vehicle.name}</div>
-          <div className="booking-summary-price">
-            ${vehicle.dailyPrice}<span className="result-card-price-unit">/day</span>
-          </div>
-        </div>
-      )}
       <div className="field-group">
         <label className="field-label" htmlFor="booking-name">
           Full name
