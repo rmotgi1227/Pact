@@ -20,7 +20,6 @@ Sales makes promises on calls. Those promises become a contract. Engineers build
 | **Commitment** | A promise from a sales call, saved with the exact words and time. |
 | **Closed Won** | The deal is signed. This starts everything. |
 | **Acceptance test** | An automatic check that one SOW line is done. It clicks through the site like a real user. |
-| **PR** | A proposed code change. "Merged" means it's now part of the product. |
 | **Change request** | New work outside the contract, written up and approved before it's built. |
 | **Warranty defect** | A bug in something the contract promised, fixed for free. |
 
