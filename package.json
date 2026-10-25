@@ -3,9 +3,11 @@
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.20.0",
-  "engines": { "node": ">=24" },
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
-    "agent": "tsx agent/main.ts",
+    "agent": "tsx --env-file-if-exists=.env agent/main.ts",
     "dashboard": "pnpm -C dashboard dev",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

@@ -8,11 +8,13 @@ import { must } from '@pact/core';
 const LINK_DIR = '/tmp/pact-builds/.vercel-link'; // linked once, its .vercel/ copied into each build
 let linked: Promise<void> | undefined;
 const token = () => ['--token', must(process.env.VERCEL_DEPLOY_TOKEN, 'VERCEL_DEPLOY_TOKEN env')];
+// VERCEL_SCOPE = the team the pact-proto project lives in (fix from Rishab's R4 run; Shreyas owns this file).
+const scope = () => (process.env.VERCEL_SCOPE ? ['--scope', process.env.VERCEL_SCOPE] : []);
 
 const link = () => linked ??= (async () => {
   await mkdir(LINK_DIR, { recursive: true });
-  await execa('vercel', ['link', '--yes', '--project', process.env.VERCEL_PROJECT ?? 'pact-proto', ...token()], { cwd: LINK_DIR });
-  await execa('vercel', ['pull', '--yes', '--environment=preview', ...token()], { cwd: LINK_DIR });
+  await execa('vercel', ['link', '--yes', '--project', process.env.VERCEL_PROJECT ?? 'pact-proto', ...token(), ...scope()], { cwd: LINK_DIR });
+  await execa('vercel', ['pull', '--yes', '--environment=preview', ...token(), ...scope()], { cwd: LINK_DIR });
 })().catch((e) => { linked = undefined; throw e; });
 
 // The box uploads only the tested source. Vercel's build machines install and build it,
@@ -20,7 +22,7 @@ const link = () => linked ??= (async () => {
 export async function deploy(srcDir: string) {
   await link();
   await cp(join(LINK_DIR, '.vercel'), join(srcDir, '.vercel'), { recursive: true });
-  const { stdout } = await execa('vercel', ['deploy', '--yes', ...token()], { cwd: srcDir, timeout: 280_000 });
+  const { stdout } = await execa('vercel', ['deploy', '--yes', ...token(), ...scope()], { cwd: srcDir, timeout: 280_000 });
   const url = stdout.trim().split('\n').pop()!.trim();
   if (!/^https:\/\/\S+\.vercel\.app$/.test(url)) throw new Error(`unexpected vercel output: ${url}`);
   return url;

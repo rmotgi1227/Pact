@@ -23,6 +23,10 @@ export const handler: Skill<{ dealId: string; version: number }, void> = async (
 
   for (const t of out.tests) {
     const knownId = sowLineIds.includes(t.sowLineId);
+    // Small local models often drop the import line. Adding it is deterministic, so code does it
+    // (fix from Rishab's R4 run; Shreyas owns this file). A spec that still has no test() is rejected.
+    if (!/from ['"]@playwright\/test['"]/.test(t.source) && /\btest\(/.test(t.source))
+      t.source = `import { test, expect } from '@playwright/test';\n${t.source}`;
     const hasImport = /from ['"]@playwright\/test['"]/.test(t.source);
     if (!knownId || !hasImport || existing.has(t.sowLineId)) {
       ctx.log.warn('spec rejected', { sowLineId: t.sowLineId, knownId, hasImport });
