@@ -7,9 +7,9 @@ const calls: string[][] = [];
 vi.mock('execa', () => ({
   execa: vi.fn(async (cmd: string, args: string[], o: { cwd: string }) => {
     calls.push([cmd, ...args]);
-    if (args[0] === 'pull') {
+    if (args[0] === 'pull' || args[0] === 'link') {
       const { mkdir, writeFile } = await import('node:fs/promises');
-      await mkdir(join(o.cwd, '.vercel'), { recursive: true }); await writeFile(join(o.cwd, '.vercel/project.json'), '{}');
+      await mkdir(join(o.cwd, '.vercel'), { recursive: true }); await writeFile(join(o.cwd, '.vercel/project.json'), JSON.stringify({ projectId: 'prj_test', orgId: 'team_test' }));
     }
     return { stdout: args[0] === 'deploy' ? 'Inspect: x\nhttps://pact-proto-abc.vercel.app' : '', exitCode: 0 };
   }),
@@ -17,7 +17,7 @@ vi.mock('execa', () => ({
 
 async function setup() {
   const dir = await mkdtemp(join(tmpdir(), 'pact-s5-'));
-  process.env.PACT_DB = join(dir, 'pact.db'); process.env.VERCEL_DEPLOY_TOKEN = 'tok';
+  process.env.PACT_DB = join(dir, 'pact.db'); process.env.PACT_VERCEL_LINK_DIR = join(dir, 'vercel-link'); process.env.VERCEL_DEPLOY_TOKEN = ''; // machine-login path: link + deploy go through the (mocked) CLI
   calls.length = 0; vi.resetModules();
   const { store, bus } = await import('@pact/core');
   const deploy = await import('./deploy.js');
