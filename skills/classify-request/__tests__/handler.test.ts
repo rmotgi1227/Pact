@@ -94,15 +94,16 @@ describe('onCrApproved', () => {
         getChangeRequest: vi.fn().mockReturnValue(cr),
         approveChangeRequest: vi.fn(),
         getApprovedSow: vi.fn().mockReturnValue(sow),
-        addSowLine: vi.fn(),
-        approveSow: vi.fn().mockReturnValue(v2Sow),
+        addSowLine: vi.fn().mockReturnValue(v2Sow),
       },
+      llm: { json: vi.fn().mockResolvedValue({ title: 'Fuel level column', criterion: 'Each result card shows the fuel level.' }) },
+      log: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
       bus: { emit: vi.fn() },
     } as unknown as Ctx;
     await onCrApproved({ crId: 'cr_1' }, ctx);
     expect(ctx.store.approveChangeRequest).toHaveBeenCalledWith('cr_1');
-    expect(ctx.store.addSowLine).toHaveBeenCalledWith('hertz-demo', { sowVersion: 2, title: cr.request, criterion: cr.request, commitmentIds: [] });
-    expect(ctx.store.approveSow).toHaveBeenCalledWith('hertz-demo', 2);
+    // Qwen words a testable criterion for the new line; code adds it as the next (already approved) version
+    expect(ctx.store.addSowLine).toHaveBeenCalledWith('hertz-demo', { title: 'Fuel level column', criterion: 'Each result card shows the fuel level.', commitmentIds: [] });
     expect(ctx.bus.emit).toHaveBeenCalledWith('sow.approved', { dealId: 'hertz-demo', version: 2 });
   });
 });
