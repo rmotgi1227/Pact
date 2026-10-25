@@ -22,6 +22,7 @@ export async function runTests(buildId: string, ctx: Ctx) {
   if (build.status !== 'ready') return; // redelivery guard: already testing/tested
   ctx.store.updateBuild(buildId, { status: 'testing' });
   const specsDir = `${buildDir(buildId)}/specs`;
+  let outcome: 'build.passed' | 'build.failed' = 'build.failed';
 
   try {
     const tests = await testsForDeal(build.dealId, ctx);
@@ -50,14 +51,15 @@ export async function runTests(buildId: string, ctx: Ctx) {
 
     const allGreen = results.length > 0 && results.every((r) => r.pass);
     ctx.store.updateBuild(buildId, { status: allGreen ? 'passed' : 'failed' });
-    await ctx.bus.emit(allGreen ? 'build.passed' : 'build.failed', { buildId: build.id });
+    if (allGreen) outcome = 'build.passed';
   } catch (err) {
     ctx.store.updateBuild(buildId, { status: 'failed' });
     ctx.log.error('test run failed', { buildId, err: String(err) });
-    await ctx.bus.emit('build.failed', { buildId: build.id });
   } finally {
     await teardown(buildId); // every exit path, including the runner timeout
   }
+  // Only after teardown, so whoever reacts to the result (deploy, triage, verify) sees no leftovers.
+  await ctx.bus.emit(outcome, { buildId: build.id });
 }
 
 // --reporter=json nests suites (one per file / describe block), so walk recursively and key by the
