@@ -1,7 +1,8 @@
 import { configDefaults, defineConfig } from 'vitest/config';
 
 // Only the repo's own tests: skip agent worktrees under .claude/, the dashboard build output, and
-// templates/booking-proto (its own project, own lockfile, own Playwright run via `pnpm test:e2e`).
+// templates/booking-proto (its own project, own lockfile, own Playwright run via `pnpm test:e2e`), and
+// generated acceptance specs (specs/), which run in the runner image.
 export default defineConfig({
-  test: { exclude: [...configDefaults.exclude, '.claude/**', 'dashboard/.next/**', 'templates/**'] },
+  test: { exclude: [...configDefaults.exclude, '.claude/**', 'dashboard/.next/**', 'templates/**', 'specs/**'] },
 });
