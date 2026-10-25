@@ -16,7 +16,7 @@ Sales makes promises on calls. Those promises become a contract. Engineers build
 
 | Term | Meaning |
 |---|---|
-| **SOW** | The contract: a numbered list of what will be built (§1.1, §3.1…). |
+| **SOW** (statement of work) | The contract: a numbered list of what will be built (§1.1, §3.1…). |
 | **Commitment** | A promise from a sales call, saved with the exact words and time. |
 | **Closed Won** | The deal is signed. This starts everything. |
 | **Acceptance test** | An automatic check that one SOW line is done. It clicks through the site like a real user. |
