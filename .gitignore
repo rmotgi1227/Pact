@@ -8,3 +8,4 @@ specs/*/
 !specs/.gitkeep
 demo/fixtures/runs/*.json
 !demo/fixtures/runs/.gitkeep
+.claude/
