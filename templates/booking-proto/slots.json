@@ -1,0 +1,16 @@
+{
+  "title": "Find your rental car",
+  "tagline": "Search by location, dates and class — one flow, every brand.",
+  "searchFields": [
+    { "key": "location", "label": "Pickup location", "type": "text" },
+    { "key": "pickupDate", "label": "Pickup date", "type": "date" },
+    { "key": "dropoffDate", "label": "Drop-off date", "type": "date" },
+    { "key": "carClass", "label": "Car class", "type": "select" }
+  ],
+  "showTabletLayout": true,
+  "screens": {
+    "results": { "heading": "Available cars" },
+    "book": { "heading": "Complete your reservation", "cta": "Reserve this car" },
+    "confirm": { "heading": "You're booked", "message": "A confirmation and receipt are on their way to your email." }
+  }
+}
