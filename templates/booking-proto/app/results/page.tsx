@@ -10,12 +10,19 @@ export default async function ResultsPage({
 }) {
   const slots = getSlots();
   const { carClass } = await searchParams;
-  const results = searchVehicles(carClass);
+  const results = [...searchVehicles(carClass)].sort((a, b) => a.dailyPrice - b.dailyPrice);
 
   return (
     <main className="page">
-      <Header title={slots.title} />
-      <h1>{slots.screens.results.heading}</h1>
+      <Header />
+      <div className="results-header">
+        <h1>{slots.screens.results.heading}</h1>
+        {results.length > 0 && (
+          <p className="results-meta">
+            {results.length} {results.length === 1 ? 'car' : 'cars'} available &middot; sorted by price, low to high
+          </p>
+        )}
+      </div>
       {results.length === 0 ? (
         <p className="empty-state">No cars match that search. Try a different class or date range.</p>
       ) : (

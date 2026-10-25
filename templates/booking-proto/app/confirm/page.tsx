@@ -12,7 +12,7 @@ export default async function ConfirmPage({
 
   return (
     <main className="page">
-      <Header title={slots.title} />
+      <Header />
       <ConfirmationBanner
         heading={slots.screens.confirm.heading}
         message={slots.screens.confirm.message}
