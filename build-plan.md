@@ -1,7 +1,7 @@
-# Pact — Build Plan (v3: phases + drafted code)
+# Pact — Build Plan
 
 **What we're building:** an event-driven agent that turns a closed deal into a contract that tests itself. The SOW is written from the sales calls, and every SOW line gets an acceptance test. Pact builds a prototype from the SOW and shares it, engineering's code is checked against the tests, and every new request or ticket is judged against the same SOW.
-**The demo:** "Hertz's rebuild, replayed with Pact." See `demo.md`.
+**The demo:** "Hertz's rebuild, replayed with Pact."
 **Build rule: a real, working agent.**
 - Every output on screen comes from a real skill running on real inputs: real transcripts, a real SOW, real tests, real containers, real deploys. No hard-coded results and no scripted answers.
 - Keep the code simple, and don't spend time on edge cases the flow never hits (multiple deals, huge diffs, odd inputs).
@@ -53,7 +53,7 @@ One env var, `PACT_MODEL_PROFILE=gb10 | mac-dev`, switches between them. The Oll
 | R2 | The dashboard shell runs on the GB10 | G | `/deals`, `/console`, `/portal` render. Buttons post events. SSE updates the screen. | 13:00 |
 | R3 | Closed Won writes the SOW | C | 8 SOW lines stream into the console, including the §3.1 tablet criterion. Every commitment is covered or flagged. Approve fires `sow.approved`. | 13:00 |
 | R4 | Pact builds a prototype from the SOW | E | `generate-prototype` fills the template and requests a build. With Shreyas's deploy step, a Vercel link opens on a phone. | 15:30 |
-| R5 | The whole demo runs end to end | H | The full `demo.md` run works 5 times in a row, with a cached fallback for every beat. | 16:30 |
+| R5 | The whole demo runs end to end | H | The full demo run works 5 times in a row, with a cached fallback for every beat. | 16:30 |
 
 ### Aryan
 | # | Goal | Phase | Done when | By |
@@ -87,7 +87,7 @@ One env var, `PACT_MODEL_PROFILE=gb10 | mac-dev`, switches between them. The Oll
 
 ## Goal loops (how each of us builds)
 
-Each person points a coding-agent loop at one goal at a time: *"make `scripts/verify/<goal>.sh` pass, following build-plan.md and CLAUDE.md."* A goal is done when its verify script exits 0. Rules for loops are in `CLAUDE.md`.
+Each person points a coding-agent loop at one goal at a time: *"make `scripts/verify/<goal>.sh` pass, following build-plan.md."* A goal is done when its verify script exits 0.
 
 | Goal | Owner | Works in | Verify | Needs first |
 |---|---|---|---|---|
@@ -219,7 +219,7 @@ These decisions came out of the second review round. They sit on top of "How it 
 
 ---
 
-## Overview (from v2; the event table is superseded by "How it all connects")
+## Overview (the event table is superseded by "How it all connects")
 
 ### Architecture
 
@@ -2458,7 +2458,7 @@ export const handler: Skill<{ ticketId: string }, { verdict: TicketVerdict }> =
 
 ### Tone rules for anything shown to Dana
 - Plain verdict + SOW reference: "Warranty defect — covered by SOW §3.1." / "Not in SOW, so it's a change request."
-- No confidence words, no model reasoning text, no dollar guesses (per demo.md).
+- No confidence words, no model reasoning text, no dollar guesses.
 
 ### Prompt rules for every skill
 Every `system.md` is loaded via `ctx.readPrompt(skill)` (never a static `.md` import), starts with `/no_think` on its own first line, and ends with "Strict JSON only, matching the schema. No explanation, no markdown." as its last line. Candidates given to the model are always trimmed to `{id, criterion}` — never the full SOW line object. Strict JSON, `temperature: 0`, one repair retry (built into `ctx.llm.json`). The model never outputs a number — no scores, confidence, or estimates. Quotes are always copied by code from the source line, never retyped by the model. Any id the model returns must come from the candidate list passed into that call; code drops anything else.
@@ -2907,13 +2907,13 @@ export function QuoteClip({ q }: { q: { transcriptId: string; t: number; text: s
 ## Phase H — Demo hardening (everyone, led by Rishab)
 
 **Goal:** the demo works every time, even if something live fails.
-**Done when:** the full `demo.md` run works 5 times in a row, and every beat has a cached fallback.
+**Done when:** the full demo run works 5 times in a row, and every beat has a cached fallback.
 
 - **Cache every beat** in `demo/fixtures/cached/`: the SOW, the test-run results, CR-014, both ticket verdicts and the deployed prototype URL. Save each from a real run.
 - **Demo controls drawer** (Phase G): Drop call 3 · Dana asks for fuel column · File iPad ticket · Load cached result. Each button posts the same event a real source would.
 - **Warm-up script:** load the models and keep them loaded, reset the store, re-seed the deal at Negotiation, revert the booking repo to the "before PR #34" state, and zero the counter.
-- **Record the video** from a clean run on the GB10, then cut it to 2:00 (`demo.md` §5).
-- **Check the Hertz guardrails** (`demo.md` §1) on every screen before recording.
+- **Record the video** from a clean run on the GB10, then cut it to 2:00.
+- **Check the Hertz guardrails** on every screen before recording.
 
 ---
 
