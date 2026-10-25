@@ -11,7 +11,7 @@
 We are putting a real company into a dramatized demo. These rules keep it factual and fair.
 
 1. **Label it, always on screen:** *"Dramatized replay based on public court filings (Hertz v. Accenture, S.D.N.Y. 1:19-cv-03508). Not Hertz's real data, people, calls or systems."*
-2. **Only the commitments come from the filings.** Each one cites its paragraph (table in §2). Everything else is invented and labeled as such: the people, the call audio, the code and the scope-drift request.
+2. **Only the commitments come from the filings.** Each one cites its paragraph (table in §2). Everything else is invented and labeled as such: the people, the call transcripts, the code and the scope-drift request.
 3. **The vendor is not named.** In the replay, the delivery firm is our made-up **Northstar Consulting**, and it is the one using Pact. We never show Accenture doing, saying or building anything. Accenture appears only on the source card, with its own response quoted.
 4. **People are made up.** No real Hertz or Accenture employees, and no cloned voices. Stock voices, labeled.
 5. **No Hertz branding.** No logo and no brand colors or fonts. Plain "Hertz" in text only. The booking site is a generic demo site called "Rental booking (replay)".
