@@ -35,10 +35,9 @@ Our demo replays a public example. Per the lawsuit, Hertz alleged it paid its ve
 
 <table>
 <tr>
-<td align="center" width="25%"><h2>$32M+</h2><sub><b>Alleged spend</b><br><a href="demo.md">per the complaint</a></sub></td>
-<td align="center" width="25%"><h2>Dec 2017</h2><sub><b>Planned launch</b><br><a href="demo.md">Complaint ¶7</a></sub></td>
-<td align="center" width="25%"><h2>1 line</h2><sub><b>"Medium (Tablet) browsers"</b><br><a href="demo.md">Complaint ¶53</a></sub></td>
-<td align="center" width="25%"><h2>0</h2><sub><b>Calls to cloud AI</b><br>all models run locally</sub></td>
+<td align="center" width="33%"><h2>$32M+</h2><sub><b>Alleged spend</b><br><a href="demo.md">per the complaint</a></sub></td>
+<td align="center" width="33%"><h2>Dec 2017</h2><sub><b>Planned launch</b><br><a href="demo.md">Complaint ¶7</a></sub></td>
+<td align="center" width="33%"><h2>1 line</h2><sub><b>"Medium (Tablet) browsers"</b><br><a href="demo.md">Complaint ¶53</a></sub></td>
 </tr>
 </table>
 
@@ -73,7 +72,7 @@ Pact follows a deal from the first sales call to the last support ticket. Each s
 
 **6. Support**: a bug report runs the matching line's test on the latest code. Fails → free fix, sent to the engineer who built it. Passes → can't reproduce. No matching line → new work. *"Booking broken on my iPad"* fails the tablet test, so it's a free fix.
 
-**7. Security**: all AI runs on the GB10, with no cloud AI and no AI API keys. Pact's code refuses to call any AI service that isn't local. The network reaches only GitHub and Vercel, and a "Try a cloud call" button proves it: the call is blocked and counted on screen.
+**7. Security**: all AI runs on the GB10, and the dashboard's counter shows **0 calls to cloud AI**. There are no AI API keys. Pact's code refuses to call any AI service that isn't local. The network reaches only GitHub and Vercel, and a "Try a cloud call" button proves it: the call is blocked and counted on screen.
 
 ```mermaid
 flowchart LR
