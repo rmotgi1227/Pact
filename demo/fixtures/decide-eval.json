@@ -1,0 +1,666 @@
+{
+ "sow": {
+  "§1.1": "A visitor can search for rental cars by pickup location, pickup date and return date.",
+  "§1.2": "Search results show every matching car as a card in a results grid with price, car class and a Book button.",
+  "§2.1": "A visitor can book a car from a result card by entering driver name and email.",
+  "§2.2": "After booking, the visitor sees a confirmation with a booking reference and can download a receipt.",
+  "§3.1": "Booking flow works at tablet width 768-1024px: no horizontal scroll, at least two result cards per row.",
+  "§4.1": "One component library serves the Hertz, Dollar and Thrifty brand themes, switchable without code changes.",
+  "§5.1": "Pages load in under 2 seconds on a 4G connection.",
+  "§6.1": "The booking flow meets WCAG 2.1 AA for keyboard navigation and contrast."
+ },
+ "cases": [
+  {
+   "use": "classify-request",
+   "note": "demo beat 5: fuel column",
+   "state": "Customer request (status call, Dana): \"One thing — can we get a fuel-level column on the results grid? Ops keeps asking about it.\"\n\nSOW lines:\n§1.2: Search results show every matching car as a card in a results grid with price, car class and a Book button.\n§1.1: A visitor can search for rental cars by pickup location, pickup date and return date.\n§2.2: After booking, the visitor sees a confirmation with a booking reference and can download a receipt.\n§3.1: Booking flow works at tablet width 768-1024px: no horizontal scroll, at least two result cards per row.\n§4.1: One component library serves the Hertz, Dollar and Thrifty brand themes, switchable without code changes.",
+   "question": "Does an existing SOW line already require what the customer is asking for?",
+   "options": [
+    {
+     "key": "covered:§1.2",
+     "label": "Yes, §1.2 already requires it"
+    },
+    {
+     "key": "covered:§1.1",
+     "label": "Yes, §1.1 already requires it"
+    },
+    {
+     "key": "covered:§2.2",
+     "label": "Yes, §2.2 already requires it"
+    },
+    {
+     "key": "covered:§3.1",
+     "label": "Yes, §3.1 already requires it"
+    },
+    {
+     "key": "covered:§4.1",
+     "label": "Yes, §4.1 already requires it"
+    },
+    {
+     "key": "partial",
+     "label": "Partly: a SOW line touches it but does not fully require it"
+    },
+    {
+     "key": "new_scope",
+     "label": "No: this is new work not in the SOW"
+    }
+   ],
+   "expected": "new_scope"
+  },
+  {
+   "use": "classify-request",
+   "note": "demo beat 7: Excel export",
+   "state": "Customer request (status call, Dana): \"Can we export the bookings list to Excel?\"\n\nSOW lines:\n§2.2: After booking, the visitor sees a confirmation with a booking reference and can download a receipt.\n§1.2: Search results show every matching car as a card in a results grid with price, car class and a Book button.\n§2.1: A visitor can book a car from a result card by entering driver name and email.\n§5.1: Pages load in under 2 seconds on a 4G connection.\n§6.1: The booking flow meets WCAG 2.1 AA for keyboard navigation and contrast.",
+   "question": "Does an existing SOW line already require what the customer is asking for?",
+   "options": [
+    {
+     "key": "covered:§2.2",
+     "label": "Yes, §2.2 already requires it"
+    },
+    {
+     "key": "covered:§1.2",
+     "label": "Yes, §1.2 already requires it"
+    },
+    {
+     "key": "covered:§2.1",
+     "label": "Yes, §2.1 already requires it"
+    },
+    {
+     "key": "covered:§5.1",
+     "label": "Yes, §5.1 already requires it"
+    },
+    {
+     "key": "covered:§6.1",
+     "label": "Yes, §6.1 already requires it"
+    },
+    {
+     "key": "partial",
+     "label": "Partly: a SOW line touches it but does not fully require it"
+    },
+    {
+     "key": "new_scope",
+     "label": "No: this is new work not in the SOW"
+    }
+   ],
+   "expected": "new_scope"
+  },
+  {
+   "use": "classify-request",
+   "note": "look-alike: tablet ask already in SOW",
+   "state": "Customer request (status call, Dana): \"Make sure the booking pages work on the iPads at the counter.\"\n\nSOW lines:\n§3.1: Booking flow works at tablet width 768-1024px: no horizontal scroll, at least two result cards per row.\n§1.2: Search results show every matching car as a card in a results grid with price, car class and a Book button.\n§2.1: A visitor can book a car from a result card by entering driver name and email.\n§4.1: One component library serves the Hertz, Dollar and Thrifty brand themes, switchable without code changes.\n§6.1: The booking flow meets WCAG 2.1 AA for keyboard navigation and contrast.",
+   "question": "Does an existing SOW line already require what the customer is asking for?",
+   "options": [
+    {
+     "key": "covered:§3.1",
+     "label": "Yes, §3.1 already requires it"
+    },
+    {
+     "key": "covered:§1.2",
+     "label": "Yes, §1.2 already requires it"
+    },
+    {
+     "key": "covered:§2.1",
+     "label": "Yes, §2.1 already requires it"
+    },
+    {
+     "key": "covered:§4.1",
+     "label": "Yes, §4.1 already requires it"
+    },
+    {
+     "key": "covered:§6.1",
+     "label": "Yes, §6.1 already requires it"
+    },
+    {
+     "key": "partial",
+     "label": "Partly: a SOW line touches it but does not fully require it"
+    },
+    {
+     "key": "new_scope",
+     "label": "No: this is new work not in the SOW"
+    }
+   ],
+   "expected": "covered:§3.1"
+  },
+  {
+   "use": "classify-request",
+   "note": "covered: brand theme",
+   "state": "Customer request (status call, Dana): \"Customers should be able to switch to the Thrifty theme.\"\n\nSOW lines:\n§4.1: One component library serves the Hertz, Dollar and Thrifty brand themes, switchable without code changes.\n§1.2: Search results show every matching car as a card in a results grid with price, car class and a Book button.\n§2.1: A visitor can book a car from a result card by entering driver name and email.\n§3.1: Booking flow works at tablet width 768-1024px: no horizontal scroll, at least two result cards per row.\n§6.1: The booking flow meets WCAG 2.1 AA for keyboard navigation and contrast.",
+   "question": "Does an existing SOW line already require what the customer is asking for?",
+   "options": [
+    {
+     "key": "covered:§4.1",
+     "label": "Yes, §4.1 already requires it"
+    },
+    {
+     "key": "covered:§1.2",
+     "label": "Yes, §1.2 already requires it"
+    },
+    {
+     "key": "covered:§2.1",
+     "label": "Yes, §2.1 already requires it"
+    },
+    {
+     "key": "covered:§3.1",
+     "label": "Yes, §3.1 already requires it"
+    },
+    {
+     "key": "covered:§6.1",
+     "label": "Yes, §6.1 already requires it"
+    },
+    {
+     "key": "partial",
+     "label": "Partly: a SOW line touches it but does not fully require it"
+    },
+    {
+     "key": "new_scope",
+     "label": "No: this is new work not in the SOW"
+    }
+   ],
+   "expected": "covered:§4.1"
+  },
+  {
+   "use": "classify-request",
+   "note": "covered: receipt",
+   "state": "Customer request (status call, Dana): \"We need customers to get a receipt after they book.\"\n\nSOW lines:\n§2.2: After booking, the visitor sees a confirmation with a booking reference and can download a receipt.\n§2.1: A visitor can book a car from a result card by entering driver name and email.\n§1.2: Search results show every matching car as a card in a results grid with price, car class and a Book button.\n§3.1: Booking flow works at tablet width 768-1024px: no horizontal scroll, at least two result cards per row.\n§5.1: Pages load in under 2 seconds on a 4G connection.",
+   "question": "Does an existing SOW line already require what the customer is asking for?",
+   "options": [
+    {
+     "key": "covered:§2.2",
+     "label": "Yes, §2.2 already requires it"
+    },
+    {
+     "key": "covered:§2.1",
+     "label": "Yes, §2.1 already requires it"
+    },
+    {
+     "key": "covered:§1.2",
+     "label": "Yes, §1.2 already requires it"
+    },
+    {
+     "key": "covered:§3.1",
+     "label": "Yes, §3.1 already requires it"
+    },
+    {
+     "key": "covered:§5.1",
+     "label": "Yes, §5.1 already requires it"
+    },
+    {
+     "key": "partial",
+     "label": "Partly: a SOW line touches it but does not fully require it"
+    },
+    {
+     "key": "new_scope",
+     "label": "No: this is new work not in the SOW"
+    }
+   ],
+   "expected": "covered:§2.2"
+  },
+  {
+   "use": "classify-request",
+   "note": "covered: search",
+   "state": "Customer request (status call, Dana): \"Can people search by pickup city and dates?\"\n\nSOW lines:\n§1.1: A visitor can search for rental cars by pickup location, pickup date and return date.\n§1.2: Search results show every matching car as a card in a results grid with price, car class and a Book button.\n§2.1: A visitor can book a car from a result card by entering driver name and email.\n§3.1: Booking flow works at tablet width 768-1024px: no horizontal scroll, at least two result cards per row.\n§4.1: One component library serves the Hertz, Dollar and Thrifty brand themes, switchable without code changes.",
+   "question": "Does an existing SOW line already require what the customer is asking for?",
+   "options": [
+    {
+     "key": "covered:§1.1",
+     "label": "Yes, §1.1 already requires it"
+    },
+    {
+     "key": "covered:§1.2",
+     "label": "Yes, §1.2 already requires it"
+    },
+    {
+     "key": "covered:§2.1",
+     "label": "Yes, §2.1 already requires it"
+    },
+    {
+     "key": "covered:§3.1",
+     "label": "Yes, §3.1 already requires it"
+    },
+    {
+     "key": "covered:§4.1",
+     "label": "Yes, §4.1 already requires it"
+    },
+    {
+     "key": "partial",
+     "label": "Partly: a SOW line touches it but does not fully require it"
+    },
+    {
+     "key": "new_scope",
+     "label": "No: this is new work not in the SOW"
+    }
+   ],
+   "expected": "covered:§1.1"
+  },
+  {
+   "use": "classify-request",
+   "note": "new: loyalty",
+   "state": "Customer request (status call, Dana): \"Can we add a loyalty points balance in the header?\"\n\nSOW lines:\n§1.2: Search results show every matching car as a card in a results grid with price, car class and a Book button.\n§1.1: A visitor can search for rental cars by pickup location, pickup date and return date.\n§2.2: After booking, the visitor sees a confirmation with a booking reference and can download a receipt.\n§3.1: Booking flow works at tablet width 768-1024px: no horizontal scroll, at least two result cards per row.\n§4.1: One component library serves the Hertz, Dollar and Thrifty brand themes, switchable without code changes.",
+   "question": "Does an existing SOW line already require what the customer is asking for?",
+   "options": [
+    {
+     "key": "covered:§1.2",
+     "label": "Yes, §1.2 already requires it"
+    },
+    {
+     "key": "covered:§1.1",
+     "label": "Yes, §1.1 already requires it"
+    },
+    {
+     "key": "covered:§2.2",
+     "label": "Yes, §2.2 already requires it"
+    },
+    {
+     "key": "covered:§3.1",
+     "label": "Yes, §3.1 already requires it"
+    },
+    {
+     "key": "covered:§4.1",
+     "label": "Yes, §4.1 already requires it"
+    },
+    {
+     "key": "partial",
+     "label": "Partly: a SOW line touches it but does not fully require it"
+    },
+    {
+     "key": "new_scope",
+     "label": "No: this is new work not in the SOW"
+    }
+   ],
+   "expected": "new_scope"
+  },
+  {
+   "use": "classify-request",
+   "note": "new: live chat",
+   "state": "Customer request (status call, Dana): \"We want a live chat widget on every page.\"\n\nSOW lines:\n§1.2: Search results show every matching car as a card in a results grid with price, car class and a Book button.\n§1.1: A visitor can search for rental cars by pickup location, pickup date and return date.\n§2.2: After booking, the visitor sees a confirmation with a booking reference and can download a receipt.\n§3.1: Booking flow works at tablet width 768-1024px: no horizontal scroll, at least two result cards per row.\n§4.1: One component library serves the Hertz, Dollar and Thrifty brand themes, switchable without code changes.",
+   "question": "Does an existing SOW line already require what the customer is asking for?",
+   "options": [
+    {
+     "key": "covered:§1.2",
+     "label": "Yes, §1.2 already requires it"
+    },
+    {
+     "key": "covered:§1.1",
+     "label": "Yes, §1.1 already requires it"
+    },
+    {
+     "key": "covered:§2.2",
+     "label": "Yes, §2.2 already requires it"
+    },
+    {
+     "key": "covered:§3.1",
+     "label": "Yes, §3.1 already requires it"
+    },
+    {
+     "key": "covered:§4.1",
+     "label": "Yes, §4.1 already requires it"
+    },
+    {
+     "key": "partial",
+     "label": "Partly: a SOW line touches it but does not fully require it"
+    },
+    {
+     "key": "new_scope",
+     "label": "No: this is new work not in the SOW"
+    }
+   ],
+   "expected": "new_scope"
+  },
+  {
+   "use": "classify-request",
+   "note": "partial: extra field on an existing card",
+   "state": "Customer request (status call, Dana): \"Can the results also show the mileage policy for each car?\"\n\nSOW lines:\n§1.2: Search results show every matching car as a card in a results grid with price, car class and a Book button.\n§1.1: A visitor can search for rental cars by pickup location, pickup date and return date.\n§2.2: After booking, the visitor sees a confirmation with a booking reference and can download a receipt.\n§3.1: Booking flow works at tablet width 768-1024px: no horizontal scroll, at least two result cards per row.\n§4.1: One component library serves the Hertz, Dollar and Thrifty brand themes, switchable without code changes.",
+   "question": "Does an existing SOW line already require what the customer is asking for?",
+   "options": [
+    {
+     "key": "covered:§1.2",
+     "label": "Yes, §1.2 already requires it"
+    },
+    {
+     "key": "covered:§1.1",
+     "label": "Yes, §1.1 already requires it"
+    },
+    {
+     "key": "covered:§2.2",
+     "label": "Yes, §2.2 already requires it"
+    },
+    {
+     "key": "covered:§3.1",
+     "label": "Yes, §3.1 already requires it"
+    },
+    {
+     "key": "covered:§4.1",
+     "label": "Yes, §4.1 already requires it"
+    },
+    {
+     "key": "partial",
+     "label": "Partly: a SOW line touches it but does not fully require it"
+    },
+    {
+     "key": "new_scope",
+     "label": "No: this is new work not in the SOW"
+    }
+   ],
+   "expected": "partial"
+  },
+  {
+   "use": "classify-request",
+   "note": "partial: a fourth brand on the theme line",
+   "state": "Customer request (status call, Dana): \"Can we add an Avis brand theme too?\"\n\nSOW lines:\n§4.1: One component library serves the Hertz, Dollar and Thrifty brand themes, switchable without code changes.\n§1.2: Search results show every matching car as a card in a results grid with price, car class and a Book button.\n§2.1: A visitor can book a car from a result card by entering driver name and email.\n§3.1: Booking flow works at tablet width 768-1024px: no horizontal scroll, at least two result cards per row.\n§6.1: The booking flow meets WCAG 2.1 AA for keyboard navigation and contrast.",
+   "question": "Does an existing SOW line already require what the customer is asking for?",
+   "options": [
+    {
+     "key": "covered:§4.1",
+     "label": "Yes, §4.1 already requires it"
+    },
+    {
+     "key": "covered:§1.2",
+     "label": "Yes, §1.2 already requires it"
+    },
+    {
+     "key": "covered:§2.1",
+     "label": "Yes, §2.1 already requires it"
+    },
+    {
+     "key": "covered:§3.1",
+     "label": "Yes, §3.1 already requires it"
+    },
+    {
+     "key": "covered:§6.1",
+     "label": "Yes, §6.1 already requires it"
+    },
+    {
+     "key": "partial",
+     "label": "Partly: a SOW line touches it but does not fully require it"
+    },
+    {
+     "key": "new_scope",
+     "label": "No: this is new work not in the SOW"
+    }
+   ],
+   "expected": "partial"
+  },
+  {
+   "use": "triage-ticket",
+   "note": "demo beat 7: iPad ticket",
+   "state": "Ticket from Dana: \"Booking broken on my iPad.\"\n\nSOW lines:\n§3.1: Booking flow works at tablet width 768-1024px: no horizontal scroll, at least two result cards per row.\n§2.1: A visitor can book a car from a result card by entering driver name and email.\n§1.2: Search results show every matching car as a card in a results grid with price, car class and a Book button.\n§4.1: One component library serves the Hertz, Dollar and Thrifty brand themes, switchable without code changes.\n§6.1: The booking flow meets WCAG 2.1 AA for keyboard navigation and contrast.",
+   "question": "Which SOW line is this ticket about?",
+   "options": [
+    {
+     "key": "§3.1",
+     "label": "§3.1"
+    },
+    {
+     "key": "§2.1",
+     "label": "§2.1"
+    },
+    {
+     "key": "§1.2",
+     "label": "§1.2"
+    },
+    {
+     "key": "§4.1",
+     "label": "§4.1"
+    },
+    {
+     "key": "§6.1",
+     "label": "§6.1"
+    },
+    {
+     "key": "none",
+     "label": "None of these"
+    }
+   ],
+   "expected": "§3.1"
+  },
+  {
+   "use": "triage-ticket",
+   "note": "demo beat 7: Excel ticket",
+   "state": "Ticket from Dana: \"Can we export to Excel?\"\n\nSOW lines:\n§2.2: After booking, the visitor sees a confirmation with a booking reference and can download a receipt.\n§1.2: Search results show every matching car as a card in a results grid with price, car class and a Book button.\n§2.1: A visitor can book a car from a result card by entering driver name and email.\n§5.1: Pages load in under 2 seconds on a 4G connection.\n§6.1: The booking flow meets WCAG 2.1 AA for keyboard navigation and contrast.",
+   "question": "Which SOW line is this ticket about?",
+   "options": [
+    {
+     "key": "§2.2",
+     "label": "§2.2"
+    },
+    {
+     "key": "§1.2",
+     "label": "§1.2"
+    },
+    {
+     "key": "§2.1",
+     "label": "§2.1"
+    },
+    {
+     "key": "§5.1",
+     "label": "§5.1"
+    },
+    {
+     "key": "§6.1",
+     "label": "§6.1"
+    },
+    {
+     "key": "none",
+     "label": "None of these"
+    }
+   ],
+   "expected": "none"
+  },
+  {
+   "use": "triage-ticket",
+   "note": "book CTA",
+   "state": "Ticket from Dana: \"The Book button on the result cards does nothing.\"\n\nSOW lines:\n§2.1: A visitor can book a car from a result card by entering driver name and email.\n§1.2: Search results show every matching car as a card in a results grid with price, car class and a Book button.\n§2.2: After booking, the visitor sees a confirmation with a booking reference and can download a receipt.\n§3.1: Booking flow works at tablet width 768-1024px: no horizontal scroll, at least two result cards per row.\n§1.1: A visitor can search for rental cars by pickup location, pickup date and return date.",
+   "question": "Which SOW line is this ticket about?",
+   "options": [
+    {
+     "key": "§2.1",
+     "label": "§2.1"
+    },
+    {
+     "key": "§1.2",
+     "label": "§1.2"
+    },
+    {
+     "key": "§2.2",
+     "label": "§2.2"
+    },
+    {
+     "key": "§3.1",
+     "label": "§3.1"
+    },
+    {
+     "key": "§1.1",
+     "label": "§1.1"
+    },
+    {
+     "key": "none",
+     "label": "None of these"
+    }
+   ],
+   "expected": "§2.1"
+  },
+  {
+   "use": "triage-ticket",
+   "note": "receipt",
+   "state": "Ticket from Dana: \"The receipt download link gives a 404.\"\n\nSOW lines:\n§2.2: After booking, the visitor sees a confirmation with a booking reference and can download a receipt.\n§2.1: A visitor can book a car from a result card by entering driver name and email.\n§1.2: Search results show every matching car as a card in a results grid with price, car class and a Book button.\n§5.1: Pages load in under 2 seconds on a 4G connection.\n§3.1: Booking flow works at tablet width 768-1024px: no horizontal scroll, at least two result cards per row.",
+   "question": "Which SOW line is this ticket about?",
+   "options": [
+    {
+     "key": "§2.2",
+     "label": "§2.2"
+    },
+    {
+     "key": "§2.1",
+     "label": "§2.1"
+    },
+    {
+     "key": "§1.2",
+     "label": "§1.2"
+    },
+    {
+     "key": "§5.1",
+     "label": "§5.1"
+    },
+    {
+     "key": "§3.1",
+     "label": "§3.1"
+    },
+    {
+     "key": "none",
+     "label": "None of these"
+    }
+   ],
+   "expected": "§2.2"
+  },
+  {
+   "use": "triage-ticket",
+   "note": "brand",
+   "state": "Ticket from Dana: \"Dollar theme shows the Hertz colors.\"\n\nSOW lines:\n§4.1: One component library serves the Hertz, Dollar and Thrifty brand themes, switchable without code changes.\n§1.2: Search results show every matching car as a card in a results grid with price, car class and a Book button.\n§3.1: Booking flow works at tablet width 768-1024px: no horizontal scroll, at least two result cards per row.\n§2.1: A visitor can book a car from a result card by entering driver name and email.\n§6.1: The booking flow meets WCAG 2.1 AA for keyboard navigation and contrast.",
+   "question": "Which SOW line is this ticket about?",
+   "options": [
+    {
+     "key": "§4.1",
+     "label": "§4.1"
+    },
+    {
+     "key": "§1.2",
+     "label": "§1.2"
+    },
+    {
+     "key": "§3.1",
+     "label": "§3.1"
+    },
+    {
+     "key": "§2.1",
+     "label": "§2.1"
+    },
+    {
+     "key": "§6.1",
+     "label": "§6.1"
+    },
+    {
+     "key": "none",
+     "label": "None of these"
+    }
+   ],
+   "expected": "§4.1"
+  },
+  {
+   "use": "triage-ticket",
+   "note": "a11y",
+   "state": "Ticket from Dana: \"Can't tab to the Book button with the keyboard.\"\n\nSOW lines:\n§6.1: The booking flow meets WCAG 2.1 AA for keyboard navigation and contrast.\n§2.1: A visitor can book a car from a result card by entering driver name and email.\n§1.2: Search results show every matching car as a card in a results grid with price, car class and a Book button.\n§3.1: Booking flow works at tablet width 768-1024px: no horizontal scroll, at least two result cards per row.\n§4.1: One component library serves the Hertz, Dollar and Thrifty brand themes, switchable without code changes.",
+   "question": "Which SOW line is this ticket about?",
+   "options": [
+    {
+     "key": "§6.1",
+     "label": "§6.1"
+    },
+    {
+     "key": "§2.1",
+     "label": "§2.1"
+    },
+    {
+     "key": "§1.2",
+     "label": "§1.2"
+    },
+    {
+     "key": "§3.1",
+     "label": "§3.1"
+    },
+    {
+     "key": "§4.1",
+     "label": "§4.1"
+    },
+    {
+     "key": "none",
+     "label": "None of these"
+    }
+   ],
+   "expected": "§6.1"
+  },
+  {
+   "use": "triage-ticket",
+   "note": "new: payment method",
+   "state": "Ticket from Dana: \"Please add Apple Pay at checkout.\"\n\nSOW lines:\n§2.1: A visitor can book a car from a result card by entering driver name and email.\n§2.2: After booking, the visitor sees a confirmation with a booking reference and can download a receipt.\n§1.2: Search results show every matching car as a card in a results grid with price, car class and a Book button.\n§4.1: One component library serves the Hertz, Dollar and Thrifty brand themes, switchable without code changes.\n§5.1: Pages load in under 2 seconds on a 4G connection.",
+   "question": "Which SOW line is this ticket about?",
+   "options": [
+    {
+     "key": "§2.1",
+     "label": "§2.1"
+    },
+    {
+     "key": "§2.2",
+     "label": "§2.2"
+    },
+    {
+     "key": "§1.2",
+     "label": "§1.2"
+    },
+    {
+     "key": "§4.1",
+     "label": "§4.1"
+    },
+    {
+     "key": "§5.1",
+     "label": "§5.1"
+    },
+    {
+     "key": "none",
+     "label": "None of these"
+    }
+   ],
+   "expected": "none"
+  },
+  {
+   "use": "consolidate-commitments",
+   "note": "dup across calls 1 and 3",
+   "state": "Commitment 1: \"The site must work on tablets.\"\nCommitment 2: \"Booking has to work on medium (tablet) browsers.\"",
+   "question": "Do these two commitments promise the same thing?",
+   "options": [
+    {
+     "key": "same",
+     "label": "Yes, same promise"
+    },
+    {
+     "key": "different",
+     "label": "No, different promises"
+    }
+   ],
+   "expected": "same"
+  },
+  {
+   "use": "consolidate-commitments",
+   "note": "different",
+   "state": "Commitment 1: \"The site must work on tablets.\"\nCommitment 2: \"One component library for all three brands.\"",
+   "question": "Do these two commitments promise the same thing?",
+   "options": [
+    {
+     "key": "same",
+     "label": "Yes, same promise"
+    },
+    {
+     "key": "different",
+     "label": "No, different promises"
+    }
+   ],
+   "expected": "different"
+  },
+  {
+   "use": "consolidate-commitments",
+   "note": "look-alike, both post-booking",
+   "state": "Commitment 1: \"Customers get a receipt after booking.\"\nCommitment 2: \"Booking confirmation shows a reference number.\"",
+   "question": "Do these two commitments promise the same thing?",
+   "options": [
+    {
+     "key": "same",
+     "label": "Yes, same promise"
+    },
+    {
+     "key": "different",
+     "label": "No, different promises"
+    }
+   ],
+   "expected": "different"
+  }
+ ]
+}
