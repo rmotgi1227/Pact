@@ -186,7 +186,7 @@ commit_and_push() {
 }
 
 existing_pr() {
-  gh pr list -R "$SLUG" --head "$1" --state all --json number -q '.[0].number' 2>/dev/null || true
+  gh pr list -R "$SLUG" --head "$1" --state open --json number -q '.[0].number' 2>/dev/null || true
 }
 
 remote_branch_exists() {
