@@ -2,6 +2,7 @@
 # Shared helpers for goal verify scripts. A goal is done when its script exits 0.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
+set -a; [ -f .env ] && . ./.env; set +a   # tokens, repo slug, PR numbers, model profile
 AGENT=${AGENT:-http://localhost:4000}
 pass() { echo "PASS: $*"; }
 fail() { echo "FAIL: $*" >&2; exit 1; }
