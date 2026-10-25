@@ -7,7 +7,21 @@ type Out = { groups: Commitment[][] };
 
 const SIM_THRESHOLD = Number(process.env.PACT_SIM_THRESHOLD ?? 0.86); // starting value; check it on the real calls
 
+// Closed Won often comes seconds after the last call is dropped. Wait until every sales call on the
+// deal has been captured, so the SOW never misses the newest promises (e.g. call 3's tablet line).
+async function waitForCapture(dealId: string, ctx: Parameters<Skill<In, Out>>[1], timeoutMs = 180_000) {
+  const start = Date.now();
+  for (;;) {
+    const pending = ctx.store.listTranscripts(dealId)
+      .filter((t) => t.kind === 'sales' && ctx.store.get('captured', t.id) === undefined);
+    if (pending.length === 0) return;
+    if (Date.now() - start > timeoutMs) { ctx.log.warn(`still capturing ${pending.map((t) => t.id).join(', ')}; drafting anyway`); return; }
+    await new Promise((r) => setTimeout(r, 1000));
+  }
+}
+
 export const handler: Skill<In, Out> = async ({ dealId }, ctx) => {
+  await waitForCapture(dealId, ctx);
   const commitments = await ctx.store.getCommitmentsByDeal(dealId);
   const vectors = await ctx.llm.embed(commitments.map((c) => c.text));
 

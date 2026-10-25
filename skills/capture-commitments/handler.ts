@@ -29,5 +29,6 @@ export const handler: Skill<In, Out> = async ({ transcriptId }, ctx) => {
     });
 
   await ctx.store.saveCommitments(commitments);
+  ctx.store.put('captured', transcript.id, { at: Date.now() }); // consolidate waits for every sales call to reach here
   return { commitmentIds: commitments.map((c) => c.id) };
 };

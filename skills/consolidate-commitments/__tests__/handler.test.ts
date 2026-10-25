@@ -20,6 +20,8 @@ function fakeCtx() {
   const ctx = {
     store: {
       getCommitmentsByDeal: vi.fn().mockResolvedValue(commitments),
+      listTranscripts: vi.fn().mockReturnValue([]), // nothing pending capture
+      get: vi.fn(),
       replaceCommitments: vi.fn((dealId: string, cs: Commitment[]) => { replaced.push({ dealId, cs }); return cs; }),
     },
     llm: { embed: vi.fn().mockResolvedValue(vectors) },

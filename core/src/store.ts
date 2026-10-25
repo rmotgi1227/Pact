@@ -8,7 +8,7 @@ export const db = new DatabaseSync(process.env.PACT_DB ?? 'pact.db');
 db.exec(`
   CREATE TABLE IF NOT EXISTS docs (kind TEXT, id TEXT, doc TEXT, PRIMARY KEY (kind, id));
   CREATE TABLE IF NOT EXISTS events (id TEXT PRIMARY KEY, topic TEXT, payload TEXT, at INTEGER);
-  CREATE TABLE IF NOT EXISTS handled (event_id TEXT, skill TEXT, PRIMARY KEY (event_id, skill));
+  CREATE TABLE IF NOT EXISTS handled (event_id TEXT, skill TEXT, done INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (event_id, skill));
   CREATE TABLE IF NOT EXISTS llm_calls (at INTEGER, skill TEXT, model TEXT, host TEXT, locality TEXT, outcome TEXT);`);
 
 const get = <T>(kind: string, id: string | number): T | undefined => {

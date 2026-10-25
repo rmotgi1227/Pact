@@ -62,4 +62,4 @@ createServer(async (req, res) => {
   } catch (err) {
     send(res, 400, { error: (err as Error).message }); // bad JSON, missing row, failed merge: never crash the agent
   }
-}).listen(4000, () => console.log('pact agent on :4000'));
+}).listen(Number(process.env.PACT_PORT ?? 4000), () => console.log(`pact agent on :${process.env.PACT_PORT ?? 4000}`));

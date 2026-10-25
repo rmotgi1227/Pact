@@ -18,6 +18,7 @@ function fakeCtx(items: { lineIndex: number; summary: string }[]) {
     store: {
       getTranscript: vi.fn().mockResolvedValue(transcript),
       saveCommitments: vi.fn((cs: unknown[]) => { saved.push(...cs); return cs; }),
+      put: vi.fn(), // marks the transcript as captured
     },
     llm: { json: vi.fn().mockResolvedValue({ items }) },
     readPrompt: vi.fn().mockResolvedValue('system prompt'),
