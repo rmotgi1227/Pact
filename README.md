@@ -111,16 +111,6 @@ flowchart LR
 
 **Why it's hard to copy:** each step is easy to rebuild. Keeping the thread from quote to contract line to test to code, through every change, is not.
 
-## What's next
-
-| | Feature | Why it matters |
-|---|---|---|
-| 🔜 | Listen during live calls | Catch promises and new requests while the call is happening. |
-| 🔜 | Many projects at once | Track a whole portfolio, not one deal. |
-| 🔜 | Export the contract with its tests | Both sides agree on what "done" means before work starts. |
-| 🔭 | Connect CRMs and support tools | Pull deals from Salesforce or HubSpot, and tickets from Zendesk. |
-| 🔭 | Learn price estimates | Price change requests from how long similar work really took. |
-
 ## Built with
 
 <p align="center">
