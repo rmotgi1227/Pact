@@ -16,8 +16,12 @@ export const makeDecide = (skill: string) => ({
       opts.map((o, i) => `${LETTERS[i]}. ${o.label}`).join('\n') + '\n\nAnswer with one letter.';
     const res = await fetch(`${profile.decide.url}/chat/completions`, {
       method: 'POST', headers: { 'content-type': 'application/json' }, signal: AbortSignal.timeout(15_000),
+      // Thinking must be off, or the model spends its 8-token budget thinking and returns no
+      // letter (infra/decide/README.md). Ollama reads reasoning_effort; vLLM reads the
+      // chat_template_kwargs flag. Harmless to send both no matter which server answers.
       body: JSON.stringify({ model: profile.decide.model, temperature: 0, max_tokens: 8,
-        messages: [{ role: 'user', content: user }], logprobs: true, top_logprobs: 5 }),
+        messages: [{ role: 'user', content: user }], logprobs: true, top_logprobs: 5,
+        reasoning_effort: 'none', chat_template_kwargs: { enable_thinking: false } }),
     });
     const j = await res.json();
     recordLocal(skill, profile.decide.model, new URL(profile.decide.url).hostname); // same llm_calls log, so the counter stays honest
