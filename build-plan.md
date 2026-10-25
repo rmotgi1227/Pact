@@ -117,7 +117,6 @@ Until R1 lands, the others build against the types in `core/src/types.ts`. They 
 - [ ] **Aryan:** create the booking-site repo from `templates/booking-proto` with pre-built feature PRs merged, **Priya's tablet PR #34 open**, and **regression PR #35 open**. Set `BOOKING_REPO`, `BOOKING_REPO_SLUG` and `REGRESSION_PR=35`.
 - [ ] **Aryan:** create a GitHub token with repo scope on the booking-site repo. Set `GITHUB_TOKEN`.
 - [ ] **Everyone:** on the Mac, `brew install ollama`, then `ollama pull qwen3.5:9b bge-m3`. Set `PACT_MODEL_PROFILE=mac-dev`. Get Docker Desktop running.
-- [ ] **Rishab:** record the stock-voice clips for calls 1–3 into `dashboard/public/audio/` (optional, for quote playback).
 
 ---
 
