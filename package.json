@@ -11,7 +11,8 @@
     "dashboard": "pnpm -C dashboard dev",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "verify": "bash scripts/verify/run.sh"
+    "verify": "bash scripts/verify/run.sh",
+    "images": "docker build -f builder/Dockerfile.base -t pact-base . && docker build -t pact-runner builder/runner"
   },
   "dependencies": {
     "@pact/core": "workspace:*",
