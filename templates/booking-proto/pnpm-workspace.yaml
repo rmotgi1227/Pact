@@ -1,0 +1,4 @@
+# Marks this directory as its own pnpm workspace root, independent of the repo root's
+# pnpm-workspace.yaml. Not a @pact/core workspace member: it builds in Docker and on Vercel
+# with its own package.json and lockfile.
+packages: []
