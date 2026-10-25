@@ -55,5 +55,8 @@ export const actions: Record<string, Action> = {
   },
   // Real egress attempt (up to 3s); OpenShell/the firewall blocks it on the GB10. On an open network
   // it would get through and be counted as cloud, which is the honest signal that the sandbox is leaking.
-  'try-cloud-call': async (_body, ctx) => { void tryCloudCall(ctx); },
+  'try-cloud-call': async (_body, ctx) => { // only meaningful inside OpenShell on the GB10; on a laptop it would really get out
+    if (process.env.PACT_MODEL_PROFILE !== 'gb10') return ctx.log.warn('try-cloud-call runs only on the GB10 (inside OpenShell)');
+    void tryCloudCall(ctx);
+  },
 };
