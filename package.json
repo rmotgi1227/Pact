@@ -8,6 +8,7 @@
     "agent": "tsx agent/main.ts",
     "dashboard": "pnpm -C dashboard dev",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
     "verify": "bash scripts/verify/run.sh"
   },
   "dependencies": {
@@ -19,6 +20,8 @@
   "devDependencies": {
     "@types/node": "^24.0.0",
     "tsx": "^4.19.0",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vite": "^7.0.0",
+    "vitest": "^5.0.0"
   }
 }
