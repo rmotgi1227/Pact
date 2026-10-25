@@ -21,11 +21,24 @@ export const handler: Skill<{ buildId: string }, void> = async ({ buildId }, ctx
     user: JSON.stringify({ sowLines: sow.lines.map((l) => ({ id: l.id, criterion: l.criterion })), diff }),
   });
 
-  const mapped = [...new Set([...fromIssues, ...fromModel.sowLineIds.filter((id) => sowIds.includes(id))])];
+  // Third, deterministic signal (fix from Rishab's e2e run; Aryan owns this file): a test that was red on the
+  // previous engineering build and is green on this PR's build was turned green by this PR.
   const tests = ctx.store.listAcceptanceTests(build.dealId);
+  const run = ctx.store.latestTestRun(buildId);
+  const prev = ctx.store.listBuilds()
+    .filter((b) => b.dealId === build.dealId && b.kind !== 'prototype' && b.createdAt < build.createdAt && ctx.store.latestTestRun(b.id))
+    .at(-1);
+  const prevRun = prev ? ctx.store.latestTestRun(prev.id) : undefined;
+  const wasGreen = new Set(prevRun?.results.filter((r) => r.pass).map((r) => r.testId) ?? []);
+  const nowGreen = new Set(run
+    ? run.results.filter((r) => r.pass).map((r) => r.testId)
+    : tests.filter((t) => t.status === 'green' && t.lastBuildId === buildId).map((t) => t.id));
+  const fromTests = run ? tests.filter((t) => nowGreen.has(t.id) && !wasGreen.has(t.id)).map((t) => t.sowLineId) : [];
+
+  const mapped = [...new Set([...fromIssues, ...fromTests, ...fromModel.sowLineIds.filter((id) => sowIds.includes(id))])];
   for (const lineId of mapped) {
     const test = tests.find((t) => t.sowLineId === lineId);
-    if (!test || test.status !== 'green' || test.lastBuildId !== buildId) continue;
+    if (!test || !nowGreen.has(test.id)) continue; // green on this exact build
     const key = `${build.prNumber}:${lineId}`;
     if (!ctx.store.hasPostedComment(key)) {
       await ctx.github.comment(build.prNumber, `Satisfies SOW ${lineId}`);

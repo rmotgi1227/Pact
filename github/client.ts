@@ -49,6 +49,14 @@ export const github = {
   },
   // Used by the `merge-regression` demo action.
   async mergePr(prNumber: number) {
+    // Right after another merge, GitHub reports mergeable=null while it recomputes, and the merge call is
+    // refused. Wait for it to settle first (fix from Rishab's e2e run; Aryan owns this file).
+    for (let i = 0; i < 20; i++) {
+      const { data } = await octokit().rest.pulls.get({ ...repo(), pull_number: prNumber });
+      if (data.merged) return;
+      if (data.mergeable !== null) break;
+      await new Promise((r) => setTimeout(r, 1500));
+    }
     await octokit().rest.pulls.merge({ ...repo(), pull_number: prNumber });
   },
   async listMergedPrs(perPage = 20) {

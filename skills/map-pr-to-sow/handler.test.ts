@@ -33,6 +33,19 @@ describe('map-pr-to-sow', () => {
     expect(store.getGreenBy('t_4_1')).toBeUndefined(); // green, but this PR isn't mapped to it
   });
 
+  it('credits the PR for a test it turned green, even with no issue link or model mapping', async () => {
+    const { store, ctx, github, handler } = await setup([]);
+    github.getPr.mockResolvedValueOnce({ prNumber: 36, author: 'priya', linkedIssues: [], mergeCommitSha: 's' });
+    store.saveAcceptanceTest({ id: 't_4_1', dealId: 'd', sowLineId: '§4.1', file: 'f', status: 'green' });
+    const base = store.createBuild({ dealId: 'd', kind: 'main', ref: 'm', createdAt: 1 });
+    store.saveTestRun({ id: 'run_base', buildId: base.id, at: 1, results: [{ testId: 't_4_1', pass: false }] });
+    const pr = store.createBuild({ dealId: 'd', kind: 'pr', ref: 's2', prNumber: 36, author: 'priya', createdAt: 2 });
+    store.saveTestRun({ id: 'run_pr', buildId: pr.id, at: 2, results: [{ testId: 't_4_1', pass: true }] });
+    await handler({ buildId: pr.id }, ctx);
+    expect(github.comment.mock.calls).toContainEqual([36, 'Satisfies SOW §4.1']);
+    expect(store.getGreenBy('t_4_1')).toEqual({ prNumber: 36, author: 'priya' });
+  });
+
   it('ignores non-pr builds', async () => {
     const { store, ctx, github, handler } = await setup([]);
     const m = store.createBuild({ dealId: 'd', kind: 'main', ref: 'x' });

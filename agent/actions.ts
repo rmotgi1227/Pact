@@ -2,7 +2,8 @@ import { readFile } from 'node:fs/promises';
 import { must, recordBlocked, recordCloud, type Ctx, type Transcript } from '@pact/core';
 import { DEAL_ID } from './state.js';
 
-const REGRESSION_PR = Number(process.env.PACT_REGRESSION_PR ?? 35); // seeded PR #35 breaks main
+// The seeded regression PR. Read at call time: scripts/reset-booking-repo.sh writes fresh numbers to .env.
+const regressionPr = () => Number(process.env.REGRESSION_PR ?? process.env.PACT_REGRESSION_PR ?? 35);
 
 // demo/fixtures/<id>.json is a full Transcript (id, dealId, kind, lines)
 export async function dropTranscript(id: string, ctx: Ctx, eventId?: string) {
@@ -42,8 +43,8 @@ export const actions: Record<string, Action> = {
     void ctx.bus.publish('cr.approved', { crId }, `cr.approved:${crId}`);
   },
   'merge-regression': async (_body, ctx) => {
-    await ctx.github.mergePr(REGRESSION_PR); // persisted on GitHub; polling sees the new main and builds it
-    ctx.log.info(`merged PR #${REGRESSION_PR}`);
+    await ctx.github.mergePr(regressionPr()); // persisted on GitHub; polling sees the new main and builds it
+    ctx.log.info(`merged PR #${regressionPr()}`);
   },
   'file-ticket': async ({ text }, ctx) => {
     const t = ctx.store.createTicket({ dealId: DEAL_ID, text: must(text, 'ticket text') });
