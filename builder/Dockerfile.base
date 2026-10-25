@@ -1,0 +1,8 @@
+# Built once from the repo root: docker build -f builder/Dockerfile.base -t pact-base .
+# The pnpm store is pre-filled from the template's lockfile, so every per-build
+# `pnpm install --offline` in Dockerfile.app never touches the network.
+FROM node:24-slim
+WORKDIR /app
+RUN corepack enable && corepack prepare pnpm@10.20.0 --activate
+COPY templates/booking-proto/package.json templates/booking-proto/pnpm-lock.yaml ./
+RUN pnpm fetch
