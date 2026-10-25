@@ -1,5 +1,6 @@
 'use client';
 import { postAction, useAgentState } from '../lib/useAgentState';
+import { MagneticButton } from './ui/magnetic-button';
 
 export function SowPanel() {
   const state = useAgentState();
@@ -32,9 +33,12 @@ export function SowPanel() {
       </ul>
 
       {sow?.status === 'draft' && lines.length > 0 && (
-        <button type="button" className="btn btn-primary" onClick={() => state && postAction('approve-sow', { dealId: state.deal.id })}>
+        <MagneticButton
+          className="bg-[var(--brand)] text-white hover:bg-[var(--brand-hover)] border-[var(--brand)]"
+          onClick={() => state && postAction('approve-sow', { dealId: state.deal.id })}
+        >
           Approve SOW (Maya)
-        </button>
+        </MagneticButton>
       )}
       {sow?.status === 'approved' && <div className="pill pill-good">Approved by Maya — sent to Engineering →</div>}
     </div>

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { postAction, useAgentState } from '../../lib/useAgentState';
 import { AgentDownNotice } from '../../components/AgentDownNotice';
 import { verdictText } from '../../components/TicketsPanel';
+import { MagneticButton } from '../../components/ui/magnetic-button';
 
 function ReviewLinks() {
   const state = useAgentState();
@@ -40,9 +41,13 @@ function ShareThisBuild() {
   const buildId = state?.prototype?.buildId ?? state?.builds.filter((b) => b.status === 'passed').at(-1)?.id;
 
   return (
-    <button type="button" className="btn" disabled={!buildId} onClick={() => buildId && postAction('share-build', { buildId })}>
+    <MagneticButton
+      className="bg-[var(--brand)] text-white hover:bg-[var(--brand-hover)] border-[var(--brand)] disabled:pointer-events-none disabled:opacity-50"
+      disabled={!buildId}
+      onClick={() => buildId && postAction('share-build', { buildId })}
+    >
       Share this build with Dana
-    </button>
+    </MagneticButton>
   );
 }
 
