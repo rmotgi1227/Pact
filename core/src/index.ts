@@ -1,3 +1,4 @@
-// @pact/core public entry. Phase A (goal R1) adds: store, bus, llm, decide, files, counter, skill runner.
-export type * from './types.js';
-export { must } from './must.js';
+// The only entry point: `import { ..., type Build } from '@pact/core'`. There is no '@pact/core/types' subpath.
+export * from './types.js'; export * from './must.js'; export * from './store.js'; export * from './bus.js';
+export * from './profiles.js'; export * from './llm.js'; export * from './decide.js'; export * from './counter.js';
+export * from './files.js'; export * from './skill.js';
