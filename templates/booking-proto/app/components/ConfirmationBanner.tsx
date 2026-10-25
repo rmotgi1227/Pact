@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export function ConfirmationBanner({
   heading,
   message,
@@ -12,10 +14,14 @@ export function ConfirmationBanner({
       <h1>{heading}</h1>
       <p>{message}</p>
       {confirmation && (
-        <p className="muted">
-          Confirmation number: <strong>{confirmation}</strong>
-        </p>
+        <div className="confirmation-code">
+          <span className="confirmation-code-label">Confirmation number</span>
+          <span className="confirmation-code-value">{confirmation}</span>
+        </div>
       )}
+      <Link href="/" className="btn btn-secondary">
+        Book another car
+      </Link>
     </section>
   );
 }

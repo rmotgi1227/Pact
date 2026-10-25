@@ -34,7 +34,7 @@ export function SearchForm({ fields }: { fields: SlotField[] }) {
                 value={values[field.key] ?? ''}
                 onChange={(e) => setValues((v) => ({ ...v, [field.key]: e.target.value }))}
               >
-                <option value="">Any</option>
+                <option value="">Any class</option>
                 {options.map((o) => (
                   <option key={o.value} value={o.value}>
                     {o.label}

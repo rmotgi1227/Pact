@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
+import { getVehicle } from '../../data/vehicles';
 
 const randomConfirmation = () => Math.random().toString(36).slice(2, 8).toUpperCase();
 
@@ -10,6 +11,7 @@ export function BookingForm({ vehicleId }: { vehicleId: string | null }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const vehicle = getVehicle(vehicleId);
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -24,6 +26,14 @@ export function BookingForm({ vehicleId }: { vehicleId: string | null }) {
 
   return (
     <form className="card" data-testid="booking-form" onSubmit={onSubmit}>
+      {vehicle && (
+        <div className="booking-summary">
+          <div className="booking-summary-name">{vehicle.name}</div>
+          <div className="booking-summary-price">
+            ${vehicle.dailyPrice}<span className="result-card-price-unit">/day</span>
+          </div>
+        </div>
+      )}
       <div className="field-group">
         <label className="field-label" htmlFor="booking-name">
           Full name
@@ -34,6 +44,8 @@ export function BookingForm({ vehicleId }: { vehicleId: string | null }) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           autoComplete="name"
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? 'booking-form-error' : undefined}
         />
       </div>
       <div className="field-group">
@@ -47,9 +59,15 @@ export function BookingForm({ vehicleId }: { vehicleId: string | null }) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? 'booking-form-error' : undefined}
         />
       </div>
-      {error && <p className="error-text">{error}</p>}
+      {error && (
+        <p className="error-text" id="booking-form-error" role="alert">
+          {error}
+        </p>
+      )}
       <button type="submit" className="btn btn-primary">
         Confirm reservation
       </button>
