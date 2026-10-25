@@ -2,6 +2,7 @@
 import { postAction, useAgentState } from '../../lib/useAgentState';
 import { AgentDownNotice } from '../../components/AgentDownNotice';
 import { QuoteClip } from '../../components/QuoteClip';
+import { MagneticButton } from '../../components/ui/magnetic-button';
 
 const COLUMNS = [
   { key: 'negotiation' as const, label: 'Negotiation' },
@@ -82,9 +83,12 @@ export default function DealsPage() {
               </button>
             )}
             {deal.stage === 'negotiation' && (
-              <button type="button" className="btn btn-primary" onClick={() => postAction('mark-closed-won', { dealId: deal.id })}>
+              <MagneticButton
+                className="bg-[var(--brand)] text-white hover:bg-[var(--brand-hover)] border-[var(--brand)]"
+                onClick={() => postAction('mark-closed-won', { dealId: deal.id })}
+              >
                 Mark Closed Won
-              </button>
+              </MagneticButton>
             )}
             {deal.stage === 'closed_won' && (
               <div className="pill pill-good">Closed Won — SOW drafting from this deal →</div>

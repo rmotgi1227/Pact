@@ -9,6 +9,10 @@ import { SowPanel } from '../../components/SowPanel';
 import { BuildsPanel } from '../../components/BuildsPanel';
 import { CrsPanel } from '../../components/CrsPanel';
 import { TicketsPanel } from '../../components/TicketsPanel';
+import { StatsRow } from '../../components/StatsRow';
+import { TestsDonut } from '../../components/TestsDonut';
+import { BuildsBarChart } from '../../components/BuildsBarChart';
+import { AgentActivityHeatmap } from '../../components/AgentActivityHeatmap';
 
 export default function ConsolePage() {
   const state = useAgentState();
@@ -27,14 +31,29 @@ export default function ConsolePage() {
     <>
       <main className="content">
         <div className="main-col">
+          <StatsRow />
           <SowPanel />
           <CoverageMeter />
           <PrototypeCard />
+          <div className="card">
+            <h3>Tests, green vs red</h3>
+            <TestsDonut />
+          </div>
+          <div className="card">
+            <h3>Tests per build</h3>
+            <BuildsBarChart />
+          </div>
           <BuildsPanel />
           <CrsPanel />
           <TicketsPanel />
         </div>
-        <AgentLogRail />
+        <div style={{ flex: '1 1 320px', minWidth: 280, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <AgentLogRail />
+          <div className="card">
+            <h3>Agent activity</h3>
+            <AgentActivityHeatmap />
+          </div>
+        </div>
       </main>
       <ProofStrip />
     </>

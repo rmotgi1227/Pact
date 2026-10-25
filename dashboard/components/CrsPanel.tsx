@@ -1,5 +1,6 @@
 'use client';
 import { postAction, useAgentState } from '../lib/useAgentState';
+import { MagneticButton } from './ui/magnetic-button';
 
 export function CrsPanel() {
   const state = useAgentState();
@@ -29,9 +30,12 @@ export function CrsPanel() {
             </div>
 
             {cr.status === 'draft' && (
-              <button type="button" className="btn btn-good" onClick={() => postAction('approve-cr', { crId: cr.id })}>
+              <MagneticButton
+                className="bg-[var(--good-bg)] text-[var(--good)] border-[var(--good-border)] hover:bg-[var(--good-border)]"
+                onClick={() => postAction('approve-cr', { crId: cr.id })}
+              >
                 Approve (Maya)
-              </button>
+              </MagneticButton>
             )}
             {cr.status === 'approved' && (
               <div className="pill pill-good">Approved by Maya — new SOW version, pending build</div>
