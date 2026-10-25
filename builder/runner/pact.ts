@@ -64,6 +64,9 @@ export async function bookFirstCar(page: Page) {
 
 // Brand switcher: every listed brand can be selected and the page keeps the same structure.
 export async function switchBrand(page: Page, name: string) {
+  // Specs often switch brand after a search, when the page is on /results (no search form there).
+  // The brand is stored, so switching from the home page is equivalent (fix from Rishab's e2e run).
+  if (!(await page.getByTestId('search-form').isVisible().catch(() => false))) await open(page, '/');
   const button = page.getByTestId('brand-switcher').getByRole('button', { name });
   await button.click();
   await expect(button).toHaveAttribute('aria-pressed', 'true');
