@@ -72,7 +72,7 @@ One env var, `PACT_MODEL_PROFILE=gb10 | mac-dev`, switches between them. The Oll
 | S2 | Locked down and provably local | B | The agent can reach only GitHub and Vercel. "Try a cloud call" is blocked and counted. | 11:30 |
 | S3 | SOW lines become tests | D | `generate-acceptance-tests` writes one Playwright spec per SOW line, including the tablet spec at 768 and 1024 px. | 14:30 |
 | S4 | Every build runs in its own container | D | PR #34 → fresh container in under 60 s → tests run → §3.1 green → `build.passed`. The container is cleaned up. | 14:30 |
-| S5 | Tested prototypes get a shareable link | E | `build.passed` for a prototype → `vercel deploy --prebuilt` → URL saved on the build and shown in the portal. | 15:30 |
+| S5 | Tested prototypes get a shareable link | E | `build.passed` for a prototype → `vercel deploy` (Vercel builds it) → URL saved on the build and shown in the portal. | 15:30 |
 
 **Handoffs:**
 - **Rishab → everyone, 10:45:** Phase A types and `ctx`.
@@ -246,7 +246,7 @@ The build, test and deploy steps are also plain code.
 |---|---|
 | **GB10** | NemoClaw with Local Ollama (vLLM where faster). Models: **Qwen3.6-35B-A3B** reasoning · **Qwen3-Coder-30B-A3B** coding · **bge-m3** embed · **Nemotron 3 Nano Omni** vision (optional, first to cut). About 60 GB of 128 GB. The dashboard runs here too. |
 | **Docker builds** | Prebuilt **arm64 base image** with dependencies baked in, so builds are fast and need no network. Each build: a fresh app container plus a Playwright test-runner container on an internal-only network. Run under OpenShell if it can manage containers (UNVERIFIED), otherwise plain Docker. The same setup works on laptops with Docker Desktop. |
-| **Vercel** | One project for prototypes. Deploy the already-built output from the GB10 with a deploy token (`vercel deploy --prebuilt`), one deployment per prototype or PR. No AI keys, no Pact code. |
+| **Vercel** | One project for prototypes. The GB10 uploads each tested build's source with a deploy token (`vercel deploy`), and Vercel builds it. One deployment per prototype or shared PR. No AI keys, no Pact code. |
 | **Laptops** | `PACT_MODEL_PROFILE=mac-dev`: **qwen3.5:9b** for every role, plus **bge-m3**, via Ollama. One env var switches to the GB10. |
 | **No speech-to-text** | Transcripts are text we write, replayed on their timestamps. |
 
@@ -314,8 +314,8 @@ export type Build = { id: string; dealId: string; kind: 'prototype' | 'pr' | 'ma
   prNumber?: number; author?: string; createdAt: number;
   status: 'queued' | 'building' | 'ready' | 'testing' | 'passed' | 'failed'; deployUrl?: string };
 export type TestRun = { id: string; buildId: string; at: number; results: { testId: string; pass: boolean; error?: string }[] };
-export type ChangeRequest = { id: string; dealId: string; request: string; quote: Quote;
-  estimate: string | null; status: 'draft' | 'approved' | 'rejected' };
+export type ChangeRequest = { id: string; dealId: string; request: string; quote: Quote; ack?: Quote; // ack = the team's "sure" reply
+  estimate: string | null; needsReview?: boolean; status: 'draft' | 'approved' | 'rejected' };
 export type Ticket = { id: string; dealId: string; text: string; status: 'open' | 'triaged';
   verdict?: 'warranty' | 'change_request' | 'not_reproduced'; sowLineId?: string; testId?: string;
   buildId?: string; assignee?: string; reason?: string };
@@ -1742,16 +1742,18 @@ import type { Ctx } from '@pact/core';
 import { must } from '@pact/core';
 import { teardown } from '../build.js';
 
-async function testsForDeal(dealId: string, ctx: Ctx, tries = 20) {
+async function testsForDeal(dealId: string, ctx: Ctx, tries = 120) {
   // A build can reach 'ready' before generate-acceptance-tests has
   // written anything for a brand-new deal (prototype builds race the
   // SOW-approval fan-out). Wait rather than testing against zero specs.
+  // Wait until every line of the CURRENT approved SOW has its test (e.g. the new CR line in v2).
   for (let i = 0; i < tries; i++) {
+    const sow = ctx.store.getApprovedSow(dealId);
     const tests = ctx.store.listAcceptanceTests(dealId);
-    if (tests.length > 0) return tests;
+    if (sow && sow.lines.every((l) => tests.some((t) => t.sowLineId === l.id))) return tests;
     await new Promise((r) => setTimeout(r, 500));
   }
-  return ctx.store.listAcceptanceTests(dealId);
+  return ctx.store.listAcceptanceTests(dealId); // missing tests count as failed
 }
 
 export async function runTests(buildId: string, ctx: Ctx) {
@@ -2140,7 +2142,7 @@ export async function fillTemplate(slots: Slots, dealId: string) {
 }
 ```
 
-#### `builder/deploy.ts` — real Vercel path (link/pull once, build dir is self-contained, `--prebuilt`)
+#### `builder/deploy.ts`: real Vercel path (link once, upload the tested source, Vercel builds it)
 ```ts
 import { execa } from 'execa';
 import fs from 'node:fs/promises';
@@ -2158,11 +2160,12 @@ async function ensureLinked() {
   linked = true;
 }
 
+// The box only uploads the tested source (template + demo data). Vercel's own build machines
+// install and build it, so the GB10 needs no package registry access, only the Vercel API.
 export async function deploy(buildDir: string) {
   await ensureLinked();
   await fs.cp(path.join(TEMPLATE_DIR, '.vercel'), path.join(buildDir, '.vercel'), { recursive: true });
-  await execa('vercel', ['build', '--token', process.env.VERCEL_DEPLOY_TOKEN!], { cwd: buildDir });
-  const { stdout } = await execa('vercel', ['deploy', '--prebuilt', '--token', process.env.VERCEL_DEPLOY_TOKEN!], { cwd: buildDir });
+  const { stdout } = await execa('vercel', ['deploy', '--yes', '--token', process.env.VERCEL_DEPLOY_TOKEN!], { cwd: buildDir });
   return stdout.trim().split('\n').pop()!;
 }
 
@@ -2192,7 +2195,7 @@ Both handlers are wired only through Phase A's `skills/index.ts` (`onBuildPassed
 
 ### Risks / fallbacks
 - Model may try to write code anyway — `fillTemplate` only ever writes one JSON file, so it can't.
-- Deploy path is fixed by fix-contract.md (`vercel link`/`pull` once, copy `.vercel/` per build, `vercel build`, `vercel deploy --prebuilt`) and lives entirely in `builder/deploy.ts`, decoupled from `generate-prototype` so the exact flags can still change without touching the skill.
+- Deploy path: `vercel link`/`pull` once, copy `.vercel/` into each build, then `vercel deploy` (Vercel builds it remotely, so the box needs no package registry). It lives entirely in `builder/deploy.ts`, decoupled from `generate-prototype` so the exact flags can still change without touching the skill.
 - If the fill is weak or slow on demo day, hand-write `slots.generated.json` for the Hertz deal and skip the live `ctx.llm.json` call.
 
 ---
@@ -2231,32 +2234,25 @@ Registration for `classify-request` and `triage-ticket` happens only in Phase A'
 #### `prompts/classify-request/schema.ts`
 ```ts
 import { z } from 'zod';
-
-export const ClassifyRequestOutput = z.object({
-  verdict: z.enum(['covered', 'new_scope']),
-  category: z.enum(['ui_change', 'new_field', 'new_screen', 'report_or_export', 'integration', 'other']), // qualitative; code maps it to effort
-  sowLineId: z.string().nullable(),   // must be one of the ids given in the prompt, or null
-  requestLineIndex: z.number().int(),
-  reason: z.string().min(1).max(240),
+// Qwen's only job here: find the requests in the call, and the reply that agreed to each one.
+// Whether a request is in scope is Tev1's call (Phase F2), not Qwen's.
+export const FindRequestsOutput = z.object({
+  items: z.array(z.object({
+    requestIndex: z.number().int().min(0),          // line where the customer asks for something
+    ackIndex: z.number().int().min(0).nullable(),   // line where the team agreed to it, or null
+  })),                                              // empty array = no requests in this call
 });
 ```
 
 #### `prompts/classify-request/system.md`
 ```
 /no_think
-You classify one request found in a status-call transcript line against a
-short list of candidate SOW lines (already picked by embedding similarity),
-given only as {id, criterion} pairs.
-Pick the closest sowLineId from the given list, or null if none cover it.
-verdict: "covered" if an existing SOW line's criterion already satisfies the
-request. "new_scope" otherwise.
-category must be exactly one of the enum values; pick the closest match to
-the kind of work requested.
-Never output a number, score, percentage, or confidence. reason is one
-short, neutral, factual sentence describing what was requested and why it
-does or doesn't match the picked line — no opinions, no urgency or sales
-language, no hedging words like "probably" or "likely". Never invent an id
-outside the given list.
+You read a status-call transcript. Lines are shown as [i] speaker: text.
+Find each line where the customer asks for something to be built or changed.
+For each, give its index as requestIndex, and the index of the line where
+someone on the delivery team agreed to it as ackIndex (null if nobody did).
+Greetings, small talk and questions that ask for nothing new are not requests.
+Use only indices shown in brackets. If there are no requests, return {"items": []}.
 Strict JSON only, matching the schema. No explanation, no markdown.
 ```
 
@@ -2264,45 +2260,77 @@ Strict JSON only, matching the schema. No explanation, no markdown.
 ```ts
 import type { Skill } from '@pact/core';
 import { must } from '@pact/core';
-import { ClassifyRequestOutput } from '../../prompts/classify-request/schema.js';
+import { FindRequestsOutput } from '../../prompts/classify-request/schema.js';
 
-// Effort by request category. The model picks the category; code owns the numbers.
+// Effort by request category. Tev1 picks the category; code owns the numbers.
 const EFFORT: Record<string, string | null> = {
   ui_change: '0.5-1 eng-days', new_field: '2-3 eng-days', new_screen: '3-5 eng-days',
   report_or_export: '1-2 eng-days', integration: '5-10 eng-days', other: null, // null -> "[needs estimate]"
 };
-const estimateEffort = (category: string) => EFFORT[category] ?? null;
+const MIN_P = Number(process.env.PACT_DECIDE_MIN_P ?? 0.7);
 
 export const handler: Skill<{ transcriptId: string }, { crIds: string[] }> =
   async ({ transcriptId }, ctx) => {
-    const systemPrompt = await ctx.readPrompt('classify-request');
     const transcript = must(ctx.store.getTranscript(transcriptId), 'transcript');
     if (transcript.kind !== 'status') return { crIds: [] };
     const sow = must(ctx.store.getApprovedSow(transcript.dealId), 'approved SOW');
+    const lines = transcript.lines;
+
+    // 1. Qwen reads the whole call once: which lines are requests, and who agreed.
+    const found = await ctx.llm.json({
+      role: 'reasoning', system: await ctx.readPrompt('classify-request'), schema: FindRequestsOutput,
+      user: lines.map((l, i) => `[${i}] ${l.speaker}: ${l.text}`).join('\n'),
+    });
+
     const crIds: string[] = [];
+    for (const { requestIndex, ackIndex } of found.items) {
+      const req = lines[requestIndex];
+      if (!req) continue;
+      const cands = await ctx.llm.embedTopK(req.text, sow.lines, 5);
 
-    for (const [i, line] of transcript.lines.entries()) {
-      const candidates = await ctx.llm.embedTopK(line.text, sow.lines, 3);
-      const out = await ctx.llm.json({
-        role: 'reasoning', system: systemPrompt,
-        user: JSON.stringify({
-          line, requestLineIndex: i,
-          candidates: candidates.map(c => ({ id: c.id, criterion: c.criterion })), // model never sees more than id+criterion
-        }),
-        schema: ClassifyRequestOutput,
+      // 2. Tev1 decides scope (Phase F2). Unsure -> Qwen once -> still unsure -> Maya reviews.
+      const d = await ctx.decide.choose({
+        state: `Customer request (${req.speaker}): "${req.text}"\n\nSOW lines:\n` + cands.map((c) => `${c.id}: ${c.criterion}`).join('\n'),
+        question: 'Does an existing SOW line already require what the customer is asking for?',
+        options: [
+          ...cands.map((c) => ({ key: `covered:${c.id}`, label: `Yes, ${c.id} already requires it` })),
+          { key: 'partial', label: 'Partly: a SOW line touches it but does not fully require it' },
+          { key: 'new_scope', label: 'No: this is new work not in the SOW' },
+        ],
       });
-      if (out.verdict !== 'new_scope') continue;
+      const sure = d.key !== 'unclear' && (d.p === null || d.p >= MIN_P);
+      const verdict = sure ? d.key : await escalateToQwen(req.text, cands, ctx); // same keys
+      if (verdict.startsWith('covered:')) { ctx.log.info(`covered by ${verdict.slice(8)}`, { p: d.p }); continue; }
 
+      const cat = await ctx.decide.choose({
+        state: `Request: "${req.text}"`, question: 'What kind of work is this?',
+        options: Object.keys(EFFORT).map((k) => ({ key: k, label: k.replace(/_/g, ' ') })),
+      });
+      const ack = ackIndex !== null ? lines[ackIndex] : undefined;
       const cr = ctx.store.createChangeRequest({
         dealId: transcript.dealId,
-        request: line.text,
-        quote: { transcriptId, t: line.t, text: line.text }, // copied by code, not retyped
-        estimate: estimateEffort(out.category),
+        request: req.text,
+        quote: { transcriptId, t: req.t, text: req.text },                        // Dana's exact words
+        ack: ack ? { transcriptId, t: ack.t, text: ack.text } : undefined,         // Raj's exact "sure"
+        estimate: EFFORT[cat.key] ?? null,
+        needsReview: verdict !== 'new_scope',                                     // partial/unclear -> Maya decides
       });
       crIds.push(cr.id);
     }
     return { crIds };
   };
+
+// Second opinion for unsure cases: Qwen with thinking on, same option keys.
+async function escalateToQwen(text: string, cands: { id: string; criterion: string }[], ctx: Parameters<Skill<unknown, unknown>>[1]) {
+  const { z } = await import('zod');
+  const keys = [...cands.map((c) => `covered:${c.id}`), 'partial', 'new_scope'] as [string, ...string[]];
+  const out = await ctx.llm.json({
+    role: 'reasoning', schema: z.object({ verdict: z.enum(keys) }),
+    system: `Decide if the request is already required by one of these SOW lines. Answer with one of: ${keys.join(', ')}. Strict JSON {"verdict": "..."}.`,
+    user: JSON.stringify({ request: text, sow: cands.map((c) => ({ id: c.id, criterion: c.criterion })) }),
+  });
+  return out.verdict;
+}
 
 // cr.approved -> approve the CR, add the SOW line, re-fire sow.approved
 export const onCrApproved: Skill<{ crId: string }, void> =
@@ -2364,7 +2392,7 @@ export const handler: Skill<{ ticketId: string }, { verdict: TicketVerdict }> =
     });
 
     if (!pick.sowLineId) {
-      ctx.store.updateTicket(ticketId, { verdict: 'change_request' });
+      ctx.store.updateTicket(ticketId, { verdict: 'change_request', status: 'triaged' });
       ctx.bus.emit('ticket.triaged', { ticketId, verdict: 'change_request' });
       return { verdict: 'change_request' };
     }
@@ -2385,7 +2413,7 @@ export const handler: Skill<{ ticketId: string }, { verdict: TicketVerdict }> =
     // PASS on current main => nothing to fix right now => not_reproduced.
     const verdict: TicketVerdict = result.pass ? 'not_reproduced' : 'warranty';
     const assignee = result.pass ? undefined : ctx.store.getGreenBy(test.id)?.author;
-    ctx.store.updateTicket(ticketId, { verdict, sowLineId: pick.sowLineId, assignee });
+    ctx.store.updateTicket(ticketId, { verdict, sowLineId: pick.sowLineId, assignee, status: 'triaged' });
     ctx.bus.emit('ticket.triaged', { ticketId, verdict });
     return { verdict };
   };
@@ -2677,6 +2705,7 @@ export function ProofStrip() {
 
 #### Console excerpt — `app/console/page.tsx` renders the rest of `StateSnapshot` the same way: no derived state, no client-side filtering beyond display order
 ```tsx
+'use client'; // pages that use hooks or onClick are Client Components
 import { useAgentState } from '../../lib/useAgentState';
 
 function SowPanel() {
@@ -2697,7 +2726,7 @@ function BuildsPanel() {
       {builds.map((b) => (
         <li key={b.id}>
           {b.kind} · {b.status}
-          {b.run ? ` · ${b.run.results.filter((r) => r.status === 'passed').length}/${b.run.results.length} tests passed` : ''}
+          {b.run ? ` · ${b.run.results.filter((r) => r.pass).length}/${b.run.results.length} tests passed` : ''}
         </li>
       ))}
     </ul>
@@ -2709,7 +2738,7 @@ function CrsPanel() {
   const crs = state?.crs ?? [];
   return (
     <ul className="crs-panel">
-      {crs.map((cr) => <li key={cr.id}>{cr.id} · {cr.summary}</li>)}
+      {crs.map((cr) => <li key={cr.id}>{cr.id} · {cr.request} · “{cr.quote.text}”{cr.ack ? ` → “${cr.ack.text}”` : ''} · {cr.estimate ?? '[needs estimate]'}{cr.needsReview ? ' · needs Maya’s call' : ''}</li>)}
     </ul>
   );
 }
@@ -2719,7 +2748,14 @@ function TicketsPanel() {
   const tickets = state?.tickets ?? [];
   return (
     <ul className="tickets-panel">
-      {tickets.map((t) => <li key={t.id}>{t.id} · {t.status}</li>)}
+      {tickets.map((t) => (
+        <li key={t.id}>
+          {t.text} · {t.status === 'open' ? 'Pact is checking…'
+            : t.verdict === 'warranty' ? `Warranty defect — covered by SOW ${t.sowLineId}, no charge · assigned to ${t.assignee ?? '—'}`
+            : t.verdict === 'change_request' ? 'Not in the SOW — change request'
+            : 'Not reproduced on the current build'}
+        </li>
+      ))}
     </ul>
   );
 }
@@ -2727,7 +2763,20 @@ function TicketsPanel() {
 
 #### Portal share button — `app/portal/page.tsx` (excerpt). Every button is a real `/actions/<name>` call, never a raw `/events` POST.
 ```tsx
-import { postAction } from '../../lib/useAgentState';
+'use client';
+import { postAction, useAgentState } from '../../lib/useAgentState';
+
+// Dana's review links: the prototype, plus any engineering build that was shared with her.
+function ReviewLinks() {
+  const state = useAgentState();
+  const shared = (state?.builds ?? []).filter((b) => b.kind !== 'prototype' && b.deployUrl);
+  return (
+    <ul>
+      {state?.prototype && <li>Prototype: <a href={state.prototype.url}>{state.prototype.url}</a></li>}
+      {shared.map((b) => <li key={b.id}>Build {b.prNumber ? `PR #${b.prNumber}` : b.ref.slice(0, 7)}: <a href={b.deployUrl}>{b.deployUrl}</a></li>)}
+    </ul>
+  );
+}
 
 function ShareWithDana({ buildId }: { buildId: string }) {
   return (
@@ -2798,6 +2847,23 @@ Routes (`/deals`, `/console`, `/portal`) are plain pages composing `useAgentStat
 - `/events` is reserved for `demo.replay`; every other dashboard control goes through `/actions/<name>` so the "live demo vs. drawer" code path is identical except for that one cached-replay button. Cut the "Load cached result" button entirely if `demo.replay` doesn't get built, rather than ship a drawer button that POSTs a topic nothing listens for.
 
 ---
+
+---
+
+### Quote playback on the commitment card (demo beat 1)
+The call fixtures hold text and timestamps. Before the event, record the dramatized calls with stock voices (labeled, made-up names). Drop them in `dashboard/public/audio/<transcriptId>.mp3`. The card plays the clip from the quote's timestamp. If a file is missing, the card shows the quote and its timestamp only.
+```tsx
+'use client';
+export function QuoteClip({ q }: { q: { transcriptId: string; t: number; text: string } }) {
+  const src = `/audio/${q.transcriptId}.mp3#t=${q.t}`;
+  return (
+    <figure>
+      <blockquote>“{q.text}” <small>{q.transcriptId} · {Math.floor(q.t / 60)}:{String(q.t % 60).padStart(2, '0')}</small></blockquote>
+      <audio controls preload="none" src={src} onError={(e) => ((e.target as HTMLAudioElement).style.display = 'none')} />
+    </figure>
+  );
+}
+```
 
 ---
 
