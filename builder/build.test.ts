@@ -11,7 +11,7 @@ vi.mock('execa', () => ({
   execa: vi.fn(async (cmd: string, args: string[]) => {
     calls.push([cmd, ...args]);
     if (args[0] === 'build' && hold) await hold;
-    if (args[0] === 'run' && args.includes('pact-runner')) return runnerOut;
+    if (args[0] === 'start' && args[1] === '-a') return runnerOut;
     return { stdout: '', exitCode: 0 };
   }),
 }));
@@ -76,7 +76,7 @@ describe('builder', () => {
     expect(store.latestTestRun(b.id)!.results).toEqual([{ testId: 't_1_1', pass: true }, { testId: 't_3_1', pass: false }]);
     expect(store.getBuild(b.id)!.status).toBe('failed');
     expect(emitted.map((e) => e.topic)).toContain('build.failed');
-    expect(calls).toContainEqual(['docker', 'rm', '-f', `app-${b.id}`]);
+    expect(calls).toContainEqual(['docker', 'rm', '-f', `runner-${b.id}`, `app-${b.id}`]);
     expect(calls).toContainEqual(['docker', 'network', 'rm', `pact-test-${b.id}`]);
   });
 
@@ -89,7 +89,7 @@ describe('builder', () => {
     store.updateBuild(b.id, { status: 'ready' });
     await builder.runTests(b.id, ctx);
     expect(store.listAcceptanceTests('d')[0].status).toBe('red');
-    expect(calls).toContainEqual(['docker', 'rm', '-f', `app-${b.id}`]);
+    expect(calls).toContainEqual(['docker', 'rm', '-f', `runner-${b.id}`, `app-${b.id}`]);
   });
 
   it('buildAndTest resolves with the stored run when build.passed fires', async () => {

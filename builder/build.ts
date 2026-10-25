@@ -105,6 +105,6 @@ async function waitHealthy(buildId: string, tries = 40) {
 
 // Keyed by name, so it works even if the container never started. Always both, so nothing outlives its build.
 export async function teardown(buildId: string) {
-  await execa('docker', ['rm', '-f', `app-${buildId}`], { reject: false });
+  await execa('docker', ['rm', '-f', `runner-${buildId}`, `app-${buildId}`], { reject: false });
   await execa('docker', ['network', 'rm', net(buildId)], { reject: false });
 }

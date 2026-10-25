@@ -4,5 +4,5 @@ WORKDIR /tests
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY playwright.config.ts .
-# Specs are not baked in: each run bind-mounts that build's generated specs at /tests/tests.
+# Specs are not baked in: each run docker-cps that build's generated specs into /tests/tests.
 CMD ["npx", "playwright", "test", "--reporter=json"]

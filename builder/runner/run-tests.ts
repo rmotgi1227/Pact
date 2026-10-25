@@ -30,9 +30,11 @@ export async function runTests(buildId: string, ctx: Ctx) {
     await mkdir(specsDir, { recursive: true });
     await cp(ctx.files.specsDir(build.dealId), specsDir, { recursive: true });
 
-    const { stdout, exitCode } = await execa('docker', ['run', '--rm', '--network', net(buildId),
-      '-v', `${specsDir}:/tests/tests:ro`, '-e', 'APP_URL=http://app:3000', 'pact-runner'],
-      { timeout: 90_000, reject: false });
+    // Copied in rather than bind-mounted, so it works on any docker host (Colima's VM only shares $HOME).
+    const runner = `runner-${buildId}`;
+    await execa('docker', ['create', '--name', runner, '--network', net(buildId), '-e', 'APP_URL=http://app:3000', 'pact-runner']);
+    await execa('docker', ['cp', `${specsDir}/.`, `${runner}:/tests/tests`]);
+    const { stdout, exitCode } = await execa('docker', ['start', '-a', runner], { timeout: 90_000, reject: false });
 
     // Trust the JSON only if Playwright really ran (0 = all passed, 1 = some failed). Anything else
     // (crash, bad mount, timeout) means no real results, and every test counts as failed.
