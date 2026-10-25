@@ -85,6 +85,42 @@ One env var, `PACT_MODEL_PROFILE=gb10 | mac-dev`, switches between them. The Oll
 
 ---
 
+## Goal loops (how each of us builds)
+
+Each person points a coding-agent loop at one goal at a time: *"make `scripts/verify/<goal>.sh` pass, following build-plan.md and CLAUDE.md."* A goal is done when its verify script exits 0. Rules for loops are in `CLAUDE.md`.
+
+| Goal | Owner | Works in | Verify | Needs first |
+|---|---|---|---|---|
+| R1 core + agent shell | Rishab | `core/` `agent/` `skills/index.ts` | `scripts/verify/r1.sh` | — |
+| R2 dashboard | Rishab | `dashboard/` | `scripts/verify/r2.sh` | R1 |
+| R3 Closed Won → SOW | Rishab | `skills/draft-sow/` `prompts/draft-sow/` | `scripts/verify/r3.sh` | R1, A2 |
+| R4 prototype + share | Rishab | `skills/generate-prototype/` `templates/booking-proto/` | `scripts/verify/r4.sh` | R3, S4, S5 |
+| R5 full demo | Rishab | anywhere, small fixes only | `scripts/verify/e2e.sh` | all |
+| A1 transcripts | Aryan | `demo/fixtures/` | `scripts/verify/a1.sh` | — |
+| A2 commitments | Aryan | `skills/capture-commitments/` `skills/consolidate-commitments/` `prompts/` | `scripts/verify/a2.sh` | R1, A1 |
+| A3 GitHub | Aryan | `github/` `skills/github-sync/` `skills/map-pr-to-sow/` + booking-site repo | `scripts/verify/a3.sh` | R1, S3 |
+| A4 scope drift → CR | Aryan | `skills/classify-request/` `prompts/classify-request/` | `scripts/verify/a4.sh` | R3, S1b |
+| A5 ticket triage | Aryan | `skills/triage-ticket/` `prompts/triage-ticket/` | `scripts/verify/a5.sh` | S4, A3 |
+| S1 GB10 + models | Shreyas | `infra/` | `infra/gb10/smoke.sh` | by-hand checklist |
+| S1b Tev1 decide | Shreyas | `infra/decide/` `demo/fixtures/decide-eval.json` | `scripts/verify/s1b.sh` | S1 |
+| S2 locked down | Shreyas | `infra/openshell/` | `scripts/verify/s2.sh` | S1 |
+| S3 SOW → tests | Shreyas | `skills/generate-acceptance-tests/` `prompts/generate-acceptance-tests/` | `scripts/verify/s3.sh` | R3 |
+| S4 container builds | Shreyas | `builder/` `skills/run-acceptance-tests/` | `scripts/verify/s4.sh` | R1, S3 |
+| S5 Vercel deploy | Shreyas | `builder/deploy.ts` | `scripts/verify/s5.sh` | S4 |
+
+Until R1 lands, the others build against the types in `core/src/types.ts`. They are already in the scaffold, and they are the contract.
+
+### Do these by hand first (loops can't)
+- [ ] **Shreyas:** NemoClaw onboarding on the GB10 (Local Ollama). Note OpenClaw's real skill-registration API in `agent/openclaw.ts`.
+- [ ] **Shreyas:** download the models: `qwen3.6:35b-a3b`, `qwen3-coder:30b-a3b`, `bge-m3` and Tev1-4B-experimental. Check Tev1's Hugging Face license. Use local weights only, never Together or OpenRouter.
+- [ ] **Shreyas:** create a Vercel deploy token and a `pact-proto` project. Put `VERCEL_DEPLOY_TOKEN` in `.env` on the GB10.
+- [ ] **Aryan:** create the booking-site repo from `templates/booking-proto` with pre-built feature PRs merged, **Priya's tablet PR #34 open**, and **regression PR #35 open**. Set `BOOKING_REPO`, `BOOKING_REPO_SLUG` and `REGRESSION_PR=35`.
+- [ ] **Aryan:** create a GitHub token with repo scope on the booking-site repo. Set `GITHUB_TOKEN`.
+- [ ] **Everyone:** on the Mac, `brew install ollama`, then `ollama pull qwen3.5:9b bge-m3`. Set `PACT_MODEL_PROFILE=mac-dev`. Get Docker Desktop running.
+- [ ] **Rishab:** record the stock-voice clips for calls 1–3 into `dashboard/public/audio/` (optional, for quote playback).
+
+---
+
 ## How it all connects
 
 These rules came out of the squad's code review (terence/codex, gary, gokul, deepak), and every phase below follows them. Where the older event table in the Overview disagrees, this section wins.
