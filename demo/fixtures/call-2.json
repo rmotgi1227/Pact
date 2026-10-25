@@ -1,0 +1,18 @@
+{
+  "id": "call-2",
+  "dealId": "hertz-demo",
+  "kind": "sales",
+  "lines": [
+    { "t": 20, "speaker": "Sam", "text": "Picking up where we left off: timeline and the booking details." },
+    { "t": 110, "speaker": "Dana", "text": "We need to go live in December 2017. That date is fixed for us." },
+    { "t": 125, "speaker": "Sam", "text": "We'll plan the launch for December 2017 and track every milestone against it." },
+    { "t": 240, "speaker": "Dana", "text": "When a customer reserves, they need a confirmation number on screen right away." },
+    { "t": 255, "speaker": "Sam", "text": "The reservation step will show a confirmation number as soon as the booking completes." },
+    { "t": 390, "speaker": "Dana", "text": "Receipts should go out by email with the total price broken down." },
+    { "t": 405, "speaker": "Sam", "text": "Emailed receipts will itemize the base rate, taxes and fees." },
+    { "t": 520, "speaker": "Dana", "text": "Again, one codebase across Hertz, Dollar and Thrifty is a must." },
+    { "t": 530, "speaker": "Sam", "text": "Agreed, a single component library themed per brand." },
+    { "t": 640, "speaker": "Dana", "text": "Search results should show price per day on every car." },
+    { "t": 650, "speaker": "Sam", "text": "Every result card will show the daily price." }
+  ]
+}

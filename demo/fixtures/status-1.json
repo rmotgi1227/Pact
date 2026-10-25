@@ -1,0 +1,11 @@
+{
+  "id": "status-1",
+  "dealId": "hertz-demo",
+  "kind": "status",
+  "lines": [
+    { "t": 15, "speaker": "Raj", "text": "Hey Dana, quick status check-in before the sprint review." },
+    { "t": 60, "speaker": "Raj", "text": "Search, booking, receipts and the three brand themes are merged. Priya is finishing the tablet layout." },
+    { "t": 180, "speaker": "Dana", "text": "One thing — can we get a fuel-level column on the results grid? Ops keeps asking about it." },
+    { "t": 195, "speaker": "Raj", "text": "Sure, we can add that." }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "call-1",
+  "dealId": "hertz-demo",
+  "kind": "sales",
+  "lines": [
+    { "t": 12, "speaker": "Sam", "text": "Thanks for making the time, Dana. I'm Sam from Northstar Consulting." },
+    { "t": 30, "speaker": "Dana", "text": "Happy to. We want to rebuild the public booking website from the ground up." },
+    { "t": 95, "speaker": "Sam", "text": "We'll deliver the full booking flow: search for a car, reserve it, and email a receipt." },
+    { "t": 160, "speaker": "Dana", "text": "Search has to filter by pickup location, dates and car class." },
+    { "t": 175, "speaker": "Sam", "text": "Yes, location, dates and car class filters are part of search." },
+    { "t": 300, "speaker": "Dana", "text": "We run three brands: Hertz, Dollar and Thrifty. We don't want three separate codebases." },
+    { "t": 320, "speaker": "Sam", "text": "We'll build one shared component library that serves all three brands with their own themes." },
+    { "t": 480, "speaker": "Dana", "text": "And the site has to be responsive, phones and desktops at minimum." },
+    { "t": 495, "speaker": "Sam", "text": "Responsive layouts for small and large screens are standard for us." },
+    { "t": 610, "speaker": "Dana", "text": "Let's talk timing next call. Thanks, Sam." }
+  ]
+}

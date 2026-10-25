@@ -1,0 +1,11 @@
+{
+  "id": "call-3",
+  "dealId": "hertz-demo",
+  "kind": "sales",
+  "lines": [
+    { "t": 40, "speaker": "Sam", "text": "So to confirm, this covers the full booking flow — search, reserve, receipts." },
+    { "t": 410, "speaker": "Dana", "text": "Right, and it needs to work across Hertz, Dollar, and Thrifty, not just Hertz." },
+    { "t": 760, "speaker": "Dana", "text": "One thing that's non-negotiable: it has to work on tablets. Our counter staff use iPads all shift." },
+    { "t": 775, "speaker": "Sam", "text": "Understood — tablet is in scope, no extra charge for that." }
+  ]
+}
