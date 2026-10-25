@@ -33,12 +33,12 @@ One env var, `PACT_MODEL_PROFILE=gb10 | mac-dev`, switches between them. The Oll
 | Phase | What | Owner(s) | Drafted by | Needs | Target |
 |---|---|---|---|---|---|
 | **A** | Foundations: types, store, bus, `ctx.llm`, counter, OpenClaw bridge | Rishab | albert | — | 11:30 |
-| **B** | The box: GB10, NemoClaw, OpenClaw + Qwen, OpenShell, smoke test | Shreyesh | derek | — | 11:30 |
+| **B** | The box: GB10, NemoClaw, OpenClaw + Qwen, OpenShell, smoke test | Shreyas | derek | — | 11:30 |
 | **C** | Sales → SOW: transcripts, commitments, consolidate, draft SOW | Aryan (capture, consolidate, transcripts) · Rishab (draft-sow) | andreas | A | 13:00 |
-| **D** | Tests and builds: generate tests, Docker builder, runner, GitHub | Shreyesh (builder, runner, tests) · Aryan (`github/`) | gary | A, B, C | 14:30 |
-| **E** | Prototype and share: template, `generate-prototype`, Vercel deploy | Rishab (prototype) · Shreyesh (deploy) | ajay | C, D | 15:30 |
+| **D** | Tests and builds: generate tests, Docker builder, runner, GitHub | Shreyas (builder, runner, tests) · Aryan (`github/`) | gary | A, B, C | 14:30 |
+| **E** | Prototype and share: template, `generate-prototype`, Vercel deploy | Rishab (prototype) · Shreyas (deploy) | ajay | C, D | 15:30 |
 | **F** | Scope drift and support: `classify-request`, CR, `triage-ticket` | Aryan | deepak | C, D | 15:30 |
-| **F2** | Scope decisions with Tev1 4B: `ctx.decide`, serving, eval | Shreyesh (serve + eval) · Rishab (`ctx.decide`) · Aryan (skills) | Claude | A, B | 14:30 |
+| **F2** | Scope decisions with Tev1 4B: `ctx.decide`, serving, eval | Shreyas (serve + eval) · Rishab (`ctx.decide`) · Aryan (skills) | Claude | A, B | 14:30 |
 | **G** | Dashboard: CRM board, console, portal, SSE, demo controls | Rishab | ajay | A (screens can start on fixtures) | built alongside, done 15:30 |
 | **H** | Demo hardening: cached runs, rehearsal, video | Everyone, led by Rishab | — | all | 16:30 |
 
@@ -49,10 +49,10 @@ One env var, `PACT_MODEL_PROFILE=gb10 | mac-dev`, switches between them. The Oll
 ### Rishab (tech lead)
 | # | Goal | Phase | Done when | By |
 |---|---|---|---|---|
-| R1 | Shared contracts and core are usable by everyone | A | The `echo` skill fires on an event, calls the model on `mac-dev`, returns valid JSON, and the counter shows cloud 0. Types pushed for Aryan and Shreyesh. | 11:30 |
+| R1 | Shared contracts and core are usable by everyone | A | The `echo` skill fires on an event, calls the model on `mac-dev`, returns valid JSON, and the counter shows cloud 0. Types pushed for Aryan and Shreyas. | 11:30 |
 | R2 | The dashboard shell runs on the GB10 | G | `/deals`, `/console`, `/portal` render. Buttons post events. SSE updates the screen. | 13:00 |
 | R3 | Closed Won writes the SOW | C | 8 SOW lines stream into the console, including the §3.1 tablet criterion. Every commitment is covered or flagged. Approve fires `sow.approved`. | 13:00 |
-| R4 | Pact builds a prototype from the SOW | E | `generate-prototype` fills the template and requests a build. With Shreyesh's deploy step, a Vercel link opens on a phone. | 15:30 |
+| R4 | Pact builds a prototype from the SOW | E | `generate-prototype` fills the template and requests a build. With Shreyas's deploy step, a Vercel link opens on a phone. | 15:30 |
 | R5 | The whole demo runs end to end | H | The full `demo.md` run works 5 times in a row, with a cached fallback for every beat. | 16:30 |
 
 ### Aryan
@@ -64,7 +64,7 @@ One env var, `PACT_MODEL_PROFILE=gb10 | mac-dev`, switches between them. The Oll
 | A4 | Scope drift becomes a change request | F | Dana's fuel-column ask → CR-014 with Raj's exact quote. Approve → SOW v2 with a new red test. | 15:30 |
 | A5 | Tickets are triaged by the tests | F | iPad ticket → §3.1 test runs → "Warranty defect, covered by SOW §3.1" → Priya. Excel ticket → change request. | 15:30 |
 
-### Shreyesh
+### Shreyas
 | # | Goal | Phase | Done when | By |
 |---|---|---|---|---|
 | S1 | The GB10 is up | B | NemoClaw installed. Qwen3.6-35B-A3B is OpenClaw's model. The 4 models answer. `smoke.sh` passes on the GB10 and on a Mac. | 11:30 |
@@ -76,10 +76,10 @@ One env var, `PACT_MODEL_PROFILE=gb10 | mac-dev`, switches between them. The Oll
 
 **Handoffs:**
 - **Rishab → everyone, 10:45:** Phase A types and `ctx`.
-- **Shreyesh → everyone, 11:30:** the model endpoints and the `gb10` profile.
+- **Shreyas → everyone, 11:30:** the model endpoints and the `gb10` profile.
 - **Aryan → Rishab, 13:00:** commitments on the bus.
-- **Shreyesh → Aryan, 14:30:** `TestRun` results for ticket triage.
-- **Shreyesh → Rishab, 15:00:** the deploy step for the prototype.
+- **Shreyas → Aryan, 14:30:** `TestRun` results for ticket triage.
+- **Shreyas → Rishab, 15:00:** the deploy step for the prototype.
 
 **Check-ins:** 11:30, 13:00, 14:30, 15:30. Rishab runs the demo as far as it goes, and the team fixes the first broken beat.
 
@@ -981,7 +981,7 @@ config file, and we skip retries and production hardening.
 
 ### 2. Owner / drafted by
 
-**Owner:** Shreyesh. **Drafted by:** derek. NemoClaw/OpenClaw/OpenShell commands below
+**Owner:** Shreyas. **Drafted by:** derek. NemoClaw/OpenClaw/OpenShell commands below
 are UNVERIFIED guesses — if the real CLI differs, skip straight to the fallback in §7.
 
 ### 3. Files
@@ -1433,7 +1433,7 @@ C's three handlers are registered in Phase A's single `skills/index.ts` (the onl
 
 ### Owner / drafted by
 
-Owner: Shreyesh (builder/runner/test skills), Aryan (`github/`). Drafted by: gary.
+Owner: Shreyas (builder/runner/test skills), Aryan (`github/`). Drafted by: gary.
 
 ### Files
 
@@ -2058,7 +2058,7 @@ On `sow.approved`, fill a fixed booking-flow template with SOW-derived copy/fiel
 - URL opens and is usable on a phone.
 
 ### Owner
-`generate-prototype` — Rishab. `builder/deploy.ts` — Shreyesh. Drafted by: ajay.
+`generate-prototype` — Rishab. `builder/deploy.ts` — Shreyas. Drafted by: ajay.
 
 ### Files
 ```
@@ -2435,7 +2435,7 @@ Every `system.md` is loaded via `ctx.readPrompt(skill)` (never a static `.md` im
 
 ### Risks / fallbacks
 - Embedding retrieval may surface the wrong SOW line; show the reason string in console for override.
-- Triage requires `ctx.github.getHeadSha('main')` plus a fresh `kind: 'main'` build via `ctx.builder.buildAndTest` (Shreyesh's phase); if the builder is down, fall back to the last cached `TestRun`, labeled "cached."
+- Triage requires `ctx.github.getHeadSha('main')` plus a fresh `kind: 'main'` build via `ctx.builder.buildAndTest` (Shreyas's phase); if the builder is down, fall back to the last cached `TestRun`, labeled "cached."
 - The category table is rough. Anything in `other` shows `[needs estimate]`, never a guessed number. Tune the ranges with Maya's real numbers later.
 
 ---
@@ -2448,7 +2448,7 @@ Every `system.md` is loaded via `ctx.readPrompt(skill)` (never a static `.md` im
 
 **The model:** **Tev1-4B-experimental** (Together AI). It is a fine-tune of Qwen3.5-4B, trained to pick one option from a *state*, a *question* and 2–24 lettered options, and it answers with a single letter. It keeps the normal language-model head, so it runs on an ordinary OpenAI-compatible server. Together recommends temperature 0, max_tokens 8 and thinking off. It is about 4.5 GB in bf16, or about 3 GB at 4-bit.
 
-**Check before building on it (Shreyesh, first hour; all `UNVERIFIED`):**
+**Check before building on it (Shreyas, first hour; all `UNVERIFIED`):**
 1. **Weights download.** Featherless serves it, which suggests the weights are public as `togethercomputer/Tev1-4B-experimental`. Check the license on the Hugging Face card. **Never call it through Together's or OpenRouter's API**, because that is cloud AI.
 2. **It runs locally with logprobs:**
    - **GB10:** vLLM, which returns `logprobs`.
@@ -2456,7 +2456,7 @@ Every `system.md` is loaded via `ctx.readPrompt(skill)` (never a static `.md` im
    - If no logprobs are available, use the letter alone and rely on the "unclear" option.
 3. **Accuracy on our cases.** Run it on ~20 labeled pairs (`demo/fixtures/decide-eval.json`): the fuel-column ask, the Excel export, the iPad ticket, plus look-alikes. Note the accuracy and set the confidence threshold from those results.
 
-**Owners:** Shreyesh serves it (Phase B). Rishab adds `ctx.decide` to core (Phase A). Aryan moves `classify-request`, `triage-ticket` (line matching) and `consolidate-commitments` onto it (Phases C and F).
+**Owners:** Shreyas serves it (Phase B). Rishab adds `ctx.decide` to core (Phase A). Aryan moves `classify-request`, `triage-ticket` (line matching) and `consolidate-commitments` onto it (Phases C and F).
 
 ### Where it runs
 

@@ -146,4 +146,4 @@ We are putting a real company into a dramatized demo. These rules keep it factua
 **Owners:**
 - **Rishab:** the local dashboard (CRM board, console, portal), `draft-sow`, `generate-prototype`.
 - **Aryan:** `classify-request`, CR flow, `triage-ticket`, GitHub issues and PR comments.
-- **Shreyesh:** GB10, models, the Docker builder and test-runner container, the Vercel deploy step, `generate-acceptance-tests`.
+- **Shreyas:** GB10, models, the Docker builder and test-runner container, the Vercel deploy step, `generate-acceptance-tests`.
