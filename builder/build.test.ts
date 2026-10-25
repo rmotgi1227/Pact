@@ -44,18 +44,21 @@ describe('builder', () => {
     const a = store.createBuild({ dealId: 'd', kind: 'main', ref: 'aaa' });
     const b = store.createBuild({ dealId: 'd', kind: 'main', ref: 'bbb' });
     builder.enqueue(a.id, ctx); builder.enqueue(b.id, ctx);
-    await tick();
+    await vi.waitFor(() => expect(builds()).toHaveLength(1));
+    await tick(); // b must still be waiting while a's docker build is held
     expect(builds()).toHaveLength(1);
-    hold = null; release(); await tick();
-    expect(builds()).toHaveLength(2);
-    expect(store.getBuild(a.id)!.status).toBe('ready');
+    hold = null; release();
+    await vi.waitFor(() => expect(builds()).toHaveLength(2));
+    await vi.waitFor(() => expect(store.getBuild(a.id)!.status).toBe('ready'));
   });
 
   it('a redelivered build.requested is a no-op', async () => {
     const { store, builder, ctx } = await setup();
     const a = store.createBuild({ dealId: 'd', kind: 'main', ref: 'aaa' });
-    builder.enqueue(a.id, ctx); await tick();
-    builder.enqueue(a.id, ctx); await tick();
+    builder.enqueue(a.id, ctx);
+    await vi.waitFor(() => expect(store.getBuild(a.id)!.status).toBe('ready'));
+    builder.enqueue(a.id, ctx); // the guard returns synchronously for a build that isn't queued
+    await tick();
     expect(builds()).toHaveLength(1);
   });
 
@@ -96,7 +99,7 @@ describe('builder', () => {
     const { store, bus, builder, ctx } = await setup();
     const b = store.createBuild({ dealId: 'd', kind: 'main', ref: 'aaa' });
     const p = builder.buildAndTest(b.id, ctx);
-    await tick();
+    await vi.waitFor(() => expect(store.getBuild(b.id)!.status).toBe('ready'));
     store.saveTestRun({ id: 'r1', buildId: b.id, at: 1, results: [{ testId: 't', pass: true }] });
     await bus.publish('build.passed', { buildId: b.id });
     expect((await p).id).toBe('r1');
