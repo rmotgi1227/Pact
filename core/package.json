@@ -1,0 +1,10 @@
+{
+  "name": "@pact/core",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "zod": "^3.24.0"
+  },
+  "//": "SQLite comes from Node's built-in node:sqlite (DatabaseSync), so there is no native build step."
+}

@@ -302,6 +302,8 @@ The build, test and deploy steps are also plain code.
 
 ## Phase A — Foundations
 
+> **Scaffold note:** the store uses Node's built-in `node:sqlite` (`import { DatabaseSync } from 'node:sqlite'`) instead of `better-sqlite3`. It has the same `prepare/run/get/all` calls and needs no native build, which matters on the GB10's ARM CPU and on newer Node versions.
+
 **Goal:** One small core that every skill uses: types, the typed store, the bus, `ctx.llm`, the cloud counter, the skill runner, the skill registry and the agent process (`agent/main.ts`, HTTP on `:4000`). Simple, but fully working.
 
 **Done when:**

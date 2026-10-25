@@ -1,0 +1,15 @@
+# Selected by PACT_MODEL_PROFILE. Model tags are UNVERIFIED until `ollama list` on each box.
+profiles:
+  gb10:
+    reasoning: { model: qwen3.6:35b-a3b }
+    coding:    { model: qwen3-coder:30b-a3b }
+    embed:     { model: bge-m3 }
+    decide:    { model: togethercomputer/Tev1-4B-experimental, endpoint: http://127.0.0.1:8002/v1 }
+    vision:    { model: nemotron3-nano-omni, optional: true }  # first to cut
+    endpoint: http://127.0.0.1:11434/v1
+  mac-dev:
+    reasoning: { model: qwen3.5:9b }
+    coding:    { model: qwen3.5:9b }
+    embed:     { model: bge-m3 }
+    decide:    { model: tev1-4b, endpoint: http://127.0.0.1:11434/v1 }  # 4-bit local copy
+    endpoint: http://127.0.0.1:11434/v1

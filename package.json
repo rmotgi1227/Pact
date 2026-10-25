@@ -1,0 +1,24 @@
+{
+  "name": "pact",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.20.0",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "agent": "tsx agent/main.ts",
+    "dashboard": "pnpm -C dashboard dev",
+    "typecheck": "tsc --noEmit",
+    "verify": "bash scripts/verify/run.sh"
+  },
+  "dependencies": {
+    "@pact/core": "workspace:*",
+    "@octokit/rest": "^21.0.0",
+    "execa": "^9.5.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}

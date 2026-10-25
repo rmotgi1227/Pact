@@ -1,0 +1,7 @@
+packages:
+  - core
+  - dashboard
+# Root holds agent/, skills/, prompts/, builder/, github/ (one Node app that imports @pact/core).
+# templates/booking-proto and builder/runner are NOT workspace packages: they build inside Docker with their own lockfiles.
+onlyBuiltDependencies:
+  - esbuild
