@@ -25,7 +25,12 @@ export async function search(page: Page) {
 }
 
 // "First row of results": group result-cards by their top edge; the smallest-top group is the first row.
+// Measure the resting layout: the pointer is still where search-submit was clicked, and a card under it
+// takes its :hover lift (translateY), which would put that one card on a "row" of its own.
 export async function firstRowCount(page: Page) {
+  await page.mouse.move(0, 0);
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await page.waitForTimeout(250); // let a hover transition settle
   const tops = await page.getByTestId('result-card').evaluateAll((els) =>
     els.map((el) => Math.round(el.getBoundingClientRect().top)));
   expect(tops.length).toBeGreaterThan(0);

@@ -3,6 +3,10 @@
 source "$(dirname "$0")/_lib.sh"
 ensure_agent
 wait_for '(.tests | length) > 0 and (.tests | length) == (.sow.lines | length)' 300 "a test for every SOW line"
-for f in $(state | jq -r '.tests[].file'); do [ -f "$f" ] && grep -q "@playwright/test" "$f" || fail "bad spec $f"; done
-grep -l "768" specs/hertz-demo/*.spec.ts | xargs grep -l "1024" >/dev/null || fail "no tablet spec at 768/1024"
+tablet=0
+for f in $(state | jq -r '.tests[].file'); do
+  src=$(readf "$f") && grep -q "@playwright/test" <<<"$src" || fail "bad spec $f"
+  grep -q 768 <<<"$src" && grep -q 1024 <<<"$src" && tablet=1
+done
+[ $tablet = 1 ] || fail "no tablet spec at 768/1024"
 pass "specs on disk"

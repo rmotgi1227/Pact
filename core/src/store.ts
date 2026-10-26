@@ -97,6 +97,8 @@ export const store = {
   },
   getChangeRequest: (id: string) => get<ChangeRequest>('cr', id),
   approveChangeRequest: (id: string) => patch<ChangeRequest>('cr', id, { status: 'approved' }),
+  rejectChangeRequest: (id: string) => patch<ChangeRequest>('cr', id, { status: 'rejected' }),
+  updateChangeRequest: (id: string, p: Partial<ChangeRequest>) => patch<ChangeRequest>('cr', id, p),
   listChangeRequests: (dealId: string) => byDeal<ChangeRequest>('cr', dealId),
   createTicket(t: Pick<Ticket, 'dealId' | 'text'>) {
     const id = newId('ticket');

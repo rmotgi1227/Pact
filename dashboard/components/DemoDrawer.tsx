@@ -13,7 +13,7 @@ export function DemoDrawer() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'd' && e.metaKey && e.shiftKey) {
+      if (e.key.toLowerCase() === 'd' && (e.metaKey || e.ctrlKey) && e.shiftKey) { // Ctrl too: Linux grabs Super
         e.preventDefault();
         setOpen((o) => !o);
       } else if (e.key === 'Escape') {
@@ -37,7 +37,7 @@ export function DemoDrawer() {
       <div className="demo-drawer" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Demo controls">
         <h3>Demo controls</h3>
         <p className="muted" style={{ fontSize: '0.8rem', marginTop: 0 }}>
-          Cmd+Shift+D to toggle. Every button posts a real action to the agent.
+          Ctrl/Cmd+Shift+D to toggle. Every button posts a real action to the agent.
         </p>
 
         <button type="button" className="btn" onClick={() => postAction('drop-transcript', { id: 'call-3' })}>

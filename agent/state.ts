@@ -24,10 +24,11 @@ export function snapshot(): StateSnapshot {
     transcripts: store.listTranscripts(DEAL_ID),
     commitments: store.getCommitmentsByDeal(DEAL_ID),
     coverage: { green: lines.filter((l) => greenLines.has(l.id)).length, total: lines.length, buildId: eng?.id ?? null },
-    prototype: proto?.deployUrl ? { buildId: proto.id, url: proto.deployUrl } : null,
+    prototype: proto?.deployUrl ? { buildId: proto.id, url: proto.deployUrl, repoUrl: proto.repoUrl } : null,
     crs: store.listChangeRequests(DEAL_ID),
     tickets: store.listTickets(DEAL_ID),
     logs: [...logs],
     counter: counter(),
+    activity: bus.activity().map(({ skill, topic, since, stage }) => ({ skill, topic, since, stage })),
   };
 }

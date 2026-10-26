@@ -26,6 +26,7 @@ function fakeCtx(opts: { decideKey: string; decideP: number | null; catKey?: str
       getApprovedSow: vi.fn().mockReturnValue(sow),
       createChangeRequest: vi.fn((cr: Omit<ChangeRequest, 'id' | 'status'>) => { created.push(cr); return { ...cr, id: 'cr_1', status: 'draft' as const }; }),
     },
+    bus: { emit: vi.fn() }, // cr.drafted -> request-cr-approval
     llm: {
       json: vi.fn()
         .mockResolvedValueOnce({ items: [{ requestIndex: 1, ackIndex: 2 }] }) // find-requests pass

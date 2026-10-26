@@ -5,7 +5,7 @@
 # issues against and opens PRs on). Safe to re-run: it reuses the repo, local clone,
 # branches and PRs it already created instead of recreating them.
 #
-# Produces, on rmotgi1227/pact-booking-site (private):
+# Produces, on $BOOKING_REPO_SLUG or, if unset, a new <token owner>/pact-booking-<timestamp> (private):
 #   main                  - templates/booking-proto, with the tablet breakpoint deliberately
 #                           missing from the results grid (phone 1-col, desktop multi-col,
 #                           nothing in between -> 768-1024px shows 1 card per row).
@@ -21,9 +21,14 @@ ROOT="$(pwd)"
 need() { command -v "$1" >/dev/null 2>&1 || { echo "need $1" >&2; exit 1; }; }
 need gh; need git
 
-SLUG="${BOOKING_REPO_SLUG:-rmotgi1227/pact-booking-site}"
+set -a; [ -f .env ] && . ./.env; set +a   # GITHUB_TOKEN (a PAT works: gh reads it from the environment)
+# git authenticates through gh, so the PAT covers clone/push too, with no `gh auth login` and no global git config.
+export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=credential.https://github.com.helper GIT_CONFIG_VALUE_0='!gh auth git-credential'
+
+# No repo configured: create a fresh one under the token's account. Its name and clone path go into .env below.
+SLUG="${BOOKING_REPO_SLUG:-$(gh api user -q .login)/pact-booking-$(date +%Y%m%d-%H%M%S)}"
 OWNER="${SLUG%%/*}"; NAME="${SLUG##*/}"
-CLONE="${BOOKING_REPO:-/tmp/pact-booking-site}"
+CLONE="${BOOKING_REPO:-$HOME/$NAME}"
 TEMPLATE_DIR="$ROOT/templates/booking-proto"
 
 echo "== repo: $SLUG =="
@@ -47,8 +52,10 @@ else
   }
 fi
 git -C "$CLONE" checkout -q -B main
-git -C "$CLONE" config user.email "rmotgi1227@users.noreply.github.com"
-git -C "$CLONE" config user.name "rmotgi1227"
+# The host builder runs `git fetch` here later (builder/ops.ts); same PAT-through-gh credentials, set on this clone only.
+git -C "$CLONE" config credential.https://github.com.helper '!gh auth git-credential'
+git -C "$CLONE" config user.email "$OWNER@users.noreply.github.com"
+git -C "$CLONE" config user.name "$OWNER"
 
 seed_from_template() {
   # Copy the template into the clone, minus anything that's local-only or belongs to

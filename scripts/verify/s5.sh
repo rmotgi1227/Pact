@@ -7,4 +7,4 @@ b=$(state | jq -r '[.builds[] | select(.kind!="prototype" and .status=="passed")
 [ -n "$b" ] || fail "no passed engineering build to share (run s4 first)"
 action share-build "{\"buildId\":\"$b\"}"
 wait_for "[.builds[] | select(.id==\"$b\" and .deployUrl != null)] | length == 1" 300 "build deployed"
-url=$(state | jq -r ".builds[] | select(.id==\"$b\") | .deployUrl"); curl -sfL "$url" >/dev/null || fail "url does not open"; pass "$url opens"
+url=$(state | jq -r ".builds[] | select(.id==\"$b\") | .deployUrl"); opens "$url" || fail "url does not open for everyone: $url"; pass "$url opens"

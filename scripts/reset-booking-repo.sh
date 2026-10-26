@@ -5,9 +5,13 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 set -a; [ -f .env ] && . ./.env; set +a
-SLUG="${BOOKING_REPO_SLUG:-rmotgi1227/pact-booking-site}"
-CLONE="${BOOKING_REPO:-/tmp/pact-booking-site}"
-[[ "$SLUG" == */pact-booking-site ]] || { echo "refusing: $SLUG is not the demo repo" >&2; exit 1; }
+# git authenticates through gh, which reads GITHUB_TOKEN (a PAT works); no global git config.
+export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=credential.https://github.com.helper GIT_CONFIG_VALUE_0='!gh auth git-credential'
+# No demo repo yet: setup creates a fresh one (and records it in .env), so there's nothing to reset.
+[ -n "${BOOKING_REPO_SLUG:-}" ] || exec bash scripts/setup-booking-repo.sh
+SLUG="$BOOKING_REPO_SLUG"
+CLONE="${BOOKING_REPO:-$HOME/${SLUG##*/}}"
+[[ "$SLUG" == */pact-booking-* ]] || { echo "refusing: $SLUG is not a demo repo (pact-booking-*)" >&2; exit 1; }
 
 echo "== closing open PRs and SOW issues on $SLUG =="
 for n in $(gh pr list -R "$SLUG" --state open --json number -q '.[].number'); do gh pr close "$n" -R "$SLUG" --delete-branch >/dev/null 2>&1 || gh pr close "$n" -R "$SLUG" >/dev/null; done

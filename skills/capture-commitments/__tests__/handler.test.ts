@@ -17,6 +17,7 @@ function fakeCtx(items: { lineIndex: number; summary: string }[]) {
   const ctx = {
     store: {
       getTranscript: vi.fn().mockResolvedValue(transcript),
+      getDeal: vi.fn().mockReturnValue({ id: 'hertz-demo', name: 'Hertz', stage: 'closed_won' }),
       saveCommitments: vi.fn((cs: unknown[]) => { saved.push(...cs); return cs; }),
       put: vi.fn(), // marks the transcript as captured
     },

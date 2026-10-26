@@ -41,6 +41,28 @@ export function CrsPanel() {
               <div className="pill pill-good">Approved by Maya — new SOW version, pending build</div>
             )}
             {cr.status === 'rejected' && <div className="pill pill-bad">Rejected</div>}
+
+            {cr.approvalRequested && (
+              <div className="muted" style={{ fontSize: '0.84rem', marginTop: '0.4rem' }}>
+                {'to' in cr.approvalRequested
+                  ? `Approve / deny request emailed to ${cr.approvalRequested.to}`
+                  : `Approval email failed: ${cr.approvalRequested.error}`}
+              </div>
+            )}
+            {cr.changeOrder && (
+              <details style={{ marginTop: '0.5rem' }}>
+                <summary style={{ fontSize: '0.86rem', cursor: 'pointer' }}>
+                  {cr.changeOrder.number}: {cr.changeOrder.subject}
+                  {' · '}
+                  {cr.changeOrder.emailedAt
+                    ? `emailed to ${cr.changeOrder.emailedTo}`
+                    : cr.changeOrder.emailError ? 'email failed' : 'drafted, not emailed'}
+                </summary>
+                <pre className="mono" style={{ whiteSpace: 'pre-wrap', fontSize: '0.8rem', marginTop: '0.4rem' }}>
+                  {cr.changeOrder.body}
+                </pre>
+              </details>
+            )}
           </li>
         ))}
       </ul>

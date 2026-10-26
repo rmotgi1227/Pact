@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { must, recordBlocked, recordCloud, type Ctx, type Transcript } from '@pact/core';
 import { DEAL_ID } from './state.js';
+import { addTyped, announceCall, generate } from './transcripts.js';
 
 // The seeded regression PR. Read at call time: scripts/reset-booking-repo.sh writes fresh numbers to .env.
 const regressionPr = () => Number(process.env.REGRESSION_PR ?? process.env.PACT_REGRESSION_PR ?? 35);
@@ -10,7 +11,7 @@ export async function dropTranscript(id: string, ctx: Ctx, eventId?: string) {
   if (!/^[\w-]+$/.test(id)) throw new Error(`bad fixture id ${id}`);
   const t: Transcript = JSON.parse(await readFile(new URL(`../demo/fixtures/${id}.json`, import.meta.url), 'utf8'));
   ctx.store.saveTranscript({ ...t, id, dealId: DEAL_ID });
-  void ctx.bus.publish('transcript.added', { transcriptId: id }, eventId);
+  announceCall(id, ctx, eventId);
 }
 
 // Real egress attempt from inside the sandbox. Any HTTP answer (even 401) means the request left the box.
@@ -29,6 +30,13 @@ async function tryCloudCall(ctx: Ctx) {
 type Action = (body: any, ctx: Ctx) => Promise<void>;
 export const actions: Record<string, Action> = {
   'drop-transcript': async ({ id }, ctx) => dropTranscript(id, ctx),
+  // A call the operator adds live: typed ("Name: text" per line) or written by Qwen from a scenario.
+  'add-transcript': async ({ kind, text, scenario }, ctx) => {
+    if (kind !== 'sales' && kind !== 'status') throw new Error('kind must be sales or status');
+    if (kind === 'status' && !ctx.store.getApprovedSow(DEAL_ID)) throw new Error('approve the SOW before adding status calls');
+    if (typeof scenario === 'string' && scenario.trim()) return generate(kind, scenario.trim().slice(0, 600), ctx);
+    addTyped(kind, must(text, 'call text'), ctx);
+  },
   'mark-closed-won': async ({ dealId = DEAL_ID }, ctx) => {
     ctx.store.setDealStage(dealId, 'closed_won');
     void ctx.bus.publish('deal.closed_won', { dealId }, `deal.closed_won:${dealId}`); // a double click runs once

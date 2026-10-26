@@ -10,7 +10,7 @@ const MIN_P = Number(process.env.PACT_DECIDE_MIN_P ?? 0.7);
 
 // Closed Won often comes seconds after the last call is dropped. Wait until every sales call on the
 // deal has been captured, so the SOW never misses the newest promises (e.g. call 3's tablet line).
-async function waitForCapture(dealId: string, ctx: Ctx, timeoutMs = 180_000) {
+async function waitForCapture(dealId: string, ctx: Ctx, timeoutMs = 600_000) { // all calls are read at Closed Won
   const start = Date.now();
   for (;;) {
     const pending = ctx.store.listTranscripts(dealId)

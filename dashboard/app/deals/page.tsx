@@ -1,8 +1,8 @@
 'use client';
 import { postAction, useAgentState } from '../../lib/useAgentState';
 import { AgentDownNotice } from '../../components/AgentDownNotice';
-import { QuoteClip } from '../../components/QuoteClip';
 import { MagneticButton } from '../../components/ui/magnetic-button';
+import { NewCallCard } from '../../components/NewCallCard';
 
 const COLUMNS = [
   { key: 'negotiation' as const, label: 'Negotiation' },
@@ -24,8 +24,8 @@ export default function DealsPage() {
 
   const { deal, transcripts, commitments } = state;
   const calls = transcripts.filter((t) => t.dealId === deal.id);
-  const call3Dropped = calls.some((c) => c.id === 'call-3');
-  const latestCommitment = commitments.filter((c) => c.dealId === deal.id).at(-1);
+  const dropped = (id: string) => calls.some((c) => c.id === id);
+  const fromCall = (id: string) => commitments.filter((c) => (c.quotes ?? [c.quote]).some((q) => q.transcriptId === id));
 
   return (
     <main className="content">
@@ -55,33 +55,49 @@ export default function DealsPage() {
 
           <h3>Calls</h3>
           <ul className="list" style={{ marginBottom: '1rem' }}>
-            {calls.length === 0 && <li className="muted">No calls dropped yet.</li>}
+            {calls.length === 0 && <li className="muted">No calls yet. Drop the demo calls or add your own below; Pact gets to work when you mark the deal Closed Won.</li>}
             {calls.map((call) => (
               <li key={call.id} className="list-item">
-                <span style={{ fontWeight: 600 }}>{call.id}</span>{' '}
-                <span className="muted">
-                  · {call.kind} · {call.lines.length} line{call.lines.length === 1 ? '' : 's'}
-                </span>
+                <details>
+                  <summary style={{ cursor: 'pointer' }}>
+                    <span style={{ fontWeight: 600 }}>{call.id}</span>{' '}
+                    <span className="muted">
+                      · {call.kind} · {call.lines.length} line{call.lines.length === 1 ? '' : 's'}
+                    </span>
+                  </summary>
+                  <div style={{ fontSize: '0.84rem', marginTop: '0.4rem' }}>
+                    {call.lines.map((l, i) => (
+                      <div key={i}><span style={{ fontWeight: 600 }}>{l.speaker}:</span> {l.text}</div>
+                    ))}
+                  </div>
+                </details>
+                {call.kind === 'sales' && (
+                  <div style={{ fontSize: '0.82rem', marginTop: '0.4rem' }}>
+                    {fromCall(call.id).length === 0
+                      ? <span className="muted">{deal.stage === 'negotiation' ? 'Pact reads this call when the deal is marked Closed Won.' : 'Reading this call…'}</span>
+                      : (
+                        <>
+                          <div className="muted" style={{ marginBottom: '0.2rem' }}>Commitments Pact captured from this call:</div>
+                          <ul style={{ margin: 0, paddingLeft: '1.1rem' }}>
+                            {fromCall(call.id).map((c) => (
+                              <li key={c.id}>{c.text} <span className="muted" style={{ fontStyle: 'italic' }}>&ldquo;{(c.quotes ?? [c.quote]).find((q) => q.transcriptId === call.id)?.text}&rdquo;</span></li>
+                            ))}
+                          </ul>
+                        </>
+                      )}
+                  </div>
+                )}
               </li>
             ))}
           </ul>
 
-          {latestCommitment && (
-            <div style={{ marginBottom: '1rem' }}>
-              <div className="muted" style={{ fontSize: '0.78rem', marginBottom: '0.3rem' }}>
-                Latest commitment captured
-              </div>
-              <div style={{ fontSize: '0.86rem', marginBottom: '0.4rem' }}>{latestCommitment.text}</div>
-              <QuoteClip q={latestCommitment.quote} />
-            </div>
-          )}
 
           <div className="row">
-            {!call3Dropped && (
-              <button type="button" className="btn" onClick={() => postAction('drop-transcript', { id: 'call-3' })}>
-                Drop call 3 transcript
+            {deal.stage === 'negotiation' && ['call-1', 'call-2', 'call-3'].filter((id) => !dropped(id)).map((id) => (
+              <button key={id} type="button" className="btn" onClick={() => postAction('drop-transcript', { id })}>
+                Drop {id.replace('-', ' ')}
               </button>
-            )}
+            ))}
             {deal.stage === 'negotiation' && (
               <MagneticButton
                 className="bg-[var(--brand)] text-white hover:bg-[var(--brand-hover)] border-[var(--brand)]"
@@ -91,10 +107,12 @@ export default function DealsPage() {
               </MagneticButton>
             )}
             {deal.stage === 'closed_won' && (
-              <div className="pill pill-good">Closed Won — SOW drafting from this deal →</div>
+              <a href="/pact" className="pill pill-good" style={{ textDecoration: 'none' }}>Closed Won · Pact is on it: see the SOW, tests and builds →</a>
             )}
           </div>
         </div>
+
+        <NewCallCard />
       </div>
     </main>
   );

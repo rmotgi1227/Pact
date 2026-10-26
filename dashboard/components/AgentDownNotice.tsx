@@ -1,7 +1,11 @@
+'use client';
+import { PactControls } from './PactControls';
+
 export function AgentDownNotice() {
   return (
     <div className="agent-down" role="status">
-      Agent not running on :4000. Start it with <code className="mono">pnpm agent</code> to see live data here.
+      <div style={{ marginBottom: '0.6rem' }}>Pact isn&apos;t running. Start it here (about 2 minutes) to see live data.</div>
+      <PactControls />
     </div>
   );
 }

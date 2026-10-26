@@ -1,9 +1,9 @@
 // goal S4 (Shreyas). Runs the deal's generated specs against one build's container. See build-plan.md, Phase D.
-import { execa } from 'execa';
 import { cp, mkdir, rm } from 'node:fs/promises';
 import type { Ctx } from '@pact/core';
 import { must } from '@pact/core';
-import { buildDir, net, teardown } from '../build.js';
+import { buildDir, teardown } from '../build.js';
+import { ops } from '../ops.js';
 
 // A build can reach 'ready' before generate-acceptance-tests has written anything (prototype builds race
 // the SOW-approval fan-out). Wait until every line of the current approved SOW has its test.
@@ -31,21 +31,18 @@ export async function runTests(buildId: string, ctx: Ctx) {
     await mkdir(specsDir, { recursive: true });
     await cp(ctx.files.specsDir(build.dealId), specsDir, { recursive: true });
 
-    // Copied in rather than bind-mounted, so it works on any docker host (Colima's VM only shares $HOME).
-    const runner = `runner-${buildId}`;
-    await execa('docker', ['create', '--name', runner, '--network', net(buildId), '-e', 'APP_URL=http://app:3000', 'pact-runner']);
-    await execa('docker', ['cp', `${specsDir}/.`, `${runner}:/tests/tests`]);
-    const { stdout, exitCode } = await execa('docker', ['start', '-a', runner], { timeout: 90_000, reject: false });
+    const { stdout, exitCode } = await ops.test(buildId, specsDir);
 
     // Trust the JSON only if Playwright really ran (0 = all passed, 1 = some failed). Anything else
     // (crash, bad mount, timeout) means no real results, and every test counts as failed.
     const byFile = exitCode === 0 || exitCode === 1 ? parsePlaywrightJson(stdout) : new Map<string, boolean>();
+    const errors = parsePlaywrightErrors(stdout);
     if (byFile.size === 0) ctx.log.warn('no playwright results', { buildId, exitCode, out: stdout.slice(-500) });
 
     const results = tests.map((t) => {
       const pass = byFile.get(`${t.id}.spec.ts`) ?? false; // missing from the report = fail, never skipped
       ctx.store.setTestStatus(t.id, pass ? 'green' : 'red', buildId);
-      return { testId: t.id, pass };
+      return { testId: t.id, pass, ...(pass ? {} : { error: errors.get(`${t.id}.spec.ts`) ?? 'no result from Playwright' }) };
     });
     ctx.store.saveTestRun({ id: ctx.store.newId('run'), buildId, at: Date.now(), results });
 
@@ -80,4 +77,24 @@ export function parsePlaywrightJson(raw: string): Map<string, boolean> {
   };
   for (const suite of report.suites ?? []) visit(suite);
   return byFile;
+}
+
+// The first error message per spec file (ANSI colours stripped, trimmed), so build-features can show the coder
+// exactly why a SOW line's test failed.
+export function parsePlaywrightErrors(raw: string): Map<string, string> {
+  const errs = new Map<string, string>();
+  let report: any;
+  try { report = JSON.parse(raw.slice(raw.indexOf('{'))); } catch { return errs; }
+  const visit = (suite: any) => {
+    for (const spec of suite.specs ?? []) {
+      const file = String(spec.file ?? suite.file ?? '').split('/').pop();
+      // The message plus Playwright's code frame (the failing line), so "expected true" says which check failed.
+      const e = (spec.tests ?? []).flatMap((t: any) => t.results ?? []).map((r: any) => r.error ?? r.errors?.[0]).find(Boolean);
+      const err = e && [e.message, e.snippet].filter(Boolean).join('\n');
+      if (file && err && !errs.has(file)) errs.set(file, String(err).replace(/\x1b\[[0-9;]*m/g, '').slice(0, 1500));
+    }
+    for (const child of suite.suites ?? []) visit(child);
+  };
+  for (const suite of report.suites ?? []) visit(suite);
+  return errs;
 }

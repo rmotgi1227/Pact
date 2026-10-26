@@ -3,14 +3,21 @@ import { db } from './store.js';
 import type { Topic } from './types.js';
 
 export type BusEvent = { id: string; topic: Topic; payload: any };
-type Handler = (payload: any) => Promise<unknown>;
+type Handler = (payload: any, eventId: string) => Promise<unknown>;
 const subs: { skill: string; topic: Topic; fn: Handler }[] = [];
 const listeners = new Set<(e: BusEvent) => void>();
 const save = db.prepare('INSERT OR IGNORE INTO events VALUES (?,?,?,?)');
 // A database from before the done column: treat its rows as finished.
 try { db.exec('ALTER TABLE handled ADD COLUMN done INTEGER NOT NULL DEFAULT 1'); } catch { /* column already exists */ }
-// A claim that never finished belongs to a process that stopped mid-skill: drop it so a republish runs it again.
+// A claim that never finished belongs to a process that stopped mid-skill (a restart, a reset of the agent):
+// remember those events, drop the claims, and resumeInterrupted() re-publishes them so the skills run again.
+const interrupted = db.prepare(`SELECT DISTINCT e.id, e.topic, e.payload FROM events e JOIN handled h ON h.event_id = e.id
+  WHERE h.done = 0 ORDER BY e.at`).all() as { id: string; topic: Topic; payload: string }[];
 db.exec('DELETE FROM handled WHERE done = 0');
+
+// What is running right now, for the dashboard's "Pact is working on" indicator (StateSnapshot.activity).
+export type Activity = { skill: string; topic: Topic; eventId: string; since: number; stage: 'running' | 'openclaw' };
+const active = new Map<string, Activity>();
 const claim = db.prepare('INSERT OR IGNORE INTO handled (event_id, skill, done) VALUES (?,?,0)');
 const finish = db.prepare('UPDATE handled SET done = 1 WHERE event_id=? AND skill=?');
 const release = db.prepare('DELETE FROM handled WHERE event_id=? AND skill=?');
@@ -23,9 +30,22 @@ export const bus = {
     for (const l of listeners) try { l({ id: eventId, topic, payload }); } catch { /* a dead SSE client */ }
     return Promise.all(subs.filter((s) => s.topic === topic).map(async (s) => {
       if (claim.run(eventId, s.skill).changes === 0) return; // already handled or running
-      try { await s.fn(payload); finish.run(eventId, s.skill); }
+      const key = `${eventId}:${s.skill}`;
+      active.set(key, { skill: s.skill, topic, eventId, since: Date.now(), stage: 'running' });
+      try { await s.fn(payload, eventId); finish.run(eventId, s.skill); }
       catch (err) { release.run(eventId, s.skill); console.error(`[${s.skill}] ${topic} failed`, err); }
+      finally { active.delete(key); }
     })).then(() => undefined);
   },
   emit(topic: Topic, payload: object, eventId?: string): Promise<void> { return bus.publish(topic, payload, eventId); },
+  activity: (): Activity[] => [...active.values()].sort((a, b) => a.since - b.since),
+  setStage(eventId: string, skill: string, stage: Activity['stage']) {
+    const a = active.get(`${eventId}:${skill}`);
+    if (a) a.stage = stage;
+  },
+  // Call once after wiring skills: re-runs what a previous process left half done.
+  resumeInterrupted(): number {
+    for (const e of interrupted) void bus.publish(e.topic, JSON.parse(e.payload), e.id);
+    return interrupted.length;
+  },
 };

@@ -42,6 +42,8 @@ export async function runSkill(s: SkillDef, input: unknown) {
   catch (err) { ctx.log.error('failed', err); throw err; } // bus releases the claim so a republish retries
 }
 
-export function wireSkills(skills: SkillDef[]) {
-  for (const s of skills) bus.subscribe(s.name, s.on, (input) => runSkill(s, input));
+// dispatch decides how a skill runs for an event: directly (default), or handed to OpenClaw (agent/openclaw.ts).
+export type Dispatch = (s: SkillDef, input: unknown, eventId: string) => Promise<unknown>;
+export function wireSkills(skills: SkillDef[], dispatch: Dispatch = (s, input) => runSkill(s, input)) {
+  for (const s of skills) bus.subscribe(s.name, s.on, (input, eventId) => dispatch(s, input, eventId));
 }

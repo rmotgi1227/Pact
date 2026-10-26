@@ -1,13 +1,9 @@
 // goal S4 (Shreyas). One fresh container per build, on its own internal network. See build-plan.md, Phase D.
-import { execa } from 'execa';
-import { cp, mkdir } from 'node:fs/promises';
-import { resolve } from 'node:path';
 import type { Ctx, Skill, TestRun } from '@pact/core';
 import { must } from '@pact/core';
+import { ops } from './ops.js';
 
-const DOCKERFILE_APP = resolve(import.meta.dirname, 'Dockerfile.app');
-export const net = (buildId: string) => `pact-test-${buildId}`;
-export const buildDir = (buildId: string) => `/tmp/pact-builds/${buildId}`;
+export { buildDir, net } from './ops.js';
 const noRun = (buildId: string): TestRun => ({ id: `run_none_${buildId}`, buildId, at: Date.now(), results: [] });
 
 let busy = false;
@@ -55,33 +51,20 @@ export async function testRef(dealId: string, sha: string, ctx: Ctx): Promise<Te
 
 async function run(buildId: string, ctx: Ctx) {
   const build = must(ctx.store.getBuild(buildId), `build ${buildId}`);
-  const src = `${buildDir(buildId)}/src`;
   try {
     ctx.store.updateBuild(buildId, { status: 'building' });
-    await mkdir(src, { recursive: true });
-    // Real source per build: a prototype copies generate-prototype's output dir; a pr/main
-    // build is the exact commit from the booking repo.
-    if (build.kind === 'prototype') {
-      if (build.srcDir !== src) await cp(build.srcDir, src, { recursive: true });
-    } else {
-      const repo = must(process.env.BOOKING_REPO, 'BOOKING_REPO env');
-      await execa('git', ['-C', repo, 'fetch', '-q']);
-      await execa('sh', ['-c', `git -C "$0" archive "$1" | tar -x -C "$2"`, repo, build.ref, src]);
-    }
-    ctx.store.updateBuild(buildId, { srcDir: src });
-
-    const tag = `pact-build:${buildId}`;
     const t0 = Date.now();
-    await execa('docker', ['build', '-q', '-f', DOCKERFILE_APP, '-t', tag, src], { timeout: 120_000 });
-    await execa('docker', ['network', 'create', '--internal', net(buildId)]);
-    await execa('docker', ['run', '-d', '--name', `app-${buildId}`, '--network', net(buildId), '--network-alias', 'app', tag]);
-    await waitHealthy(buildId);
+    const { srcDir } = await ops.up(build);
+    ctx.store.updateBuild(buildId, { srcDir });
     ctx.log.info('container ready', { buildId, seconds: Math.round((Date.now() - t0) / 1000) });
 
     ctx.store.updateBuild(buildId, { status: 'ready' });
-    await ctx.bus.emit('build.ready', { buildId: build.id });
+    // Don't hold the builder while this build's tests (and, for a prototype, Qwen3-Coder's rounds) run:
+    // the next queued build (e.g. a merged engineering PR) starts right away in its own container.
+    void ctx.bus.emit('build.ready', { buildId: build.id });
   } catch (err) {
     ctx.store.updateBuild(buildId, { status: 'failed' });
+    ctx.store.put('buildError', buildId, { msg: String((err as Error).message ?? err).slice(-2000) }); // for build-features
     await teardown(buildId);
     ctx.log.error('build failed', { buildId, err: String(err) });
     await ctx.bus.emit('build.failed', { buildId }); // so anyone awaiting this build (triage) gets an answer
@@ -92,19 +75,5 @@ async function run(buildId: string, ctx: Ctx) {
   }
 }
 
-// No published ports: the probe runs inside the app container with node's fetch (the slim image has no wget).
-async function waitHealthy(buildId: string, tries = 40) {
-  const probe = "fetch('http://localhost:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))";
-  for (let i = 0; i < tries; i++) {
-    const { exitCode } = await execa('docker', ['exec', `app-${buildId}`, 'node', '-e', probe], { reject: false });
-    if (exitCode === 0) return;
-    await new Promise((r) => setTimeout(r, 500));
-  }
-  throw new Error('app container never became healthy');
-}
-
 // Keyed by name, so it works even if the container never started. Always both, so nothing outlives its build.
-export async function teardown(buildId: string) {
-  await execa('docker', ['rm', '-f', `runner-${buildId}`, `app-${buildId}`], { reject: false });
-  await execa('docker', ['network', 'rm', net(buildId)], { reject: false });
-}
+export const teardown = (buildId: string) => ops.down(buildId);

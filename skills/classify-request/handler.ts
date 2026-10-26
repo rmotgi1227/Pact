@@ -46,6 +46,7 @@ export const handler: Skill<{ transcriptId: string }, { crIds: string[] }> = asy
       needsReview: verdict !== 'new_scope',                                    // partial -> Maya decides
     });
     ctx.log.info(`Not in the SOW: change request drafted (${category})`, { crId: cr.id });
+    await ctx.bus.emit('cr.drafted', { crId: cr.id }); // -> request-cr-approval emails the operator
     crIds.push(cr.id);
   }
   return { crIds };
@@ -79,6 +80,9 @@ async function scopeVerdict(request: string, cands: Cand[], ctx: Ctx): Promise<{
   });
   return { verdict: out.verdict, p: null };
 }
+
+// Effort for any out-of-scope request (status-call asks here, out-of-scope tickets in triage-ticket).
+export const estimateFor = async (text: string, ctx: Ctx) => EFFORT[await pickCategory(text, ctx)] ?? null;
 
 async function pickCategory(text: string, ctx: Ctx): Promise<string> {
   const keys = Object.keys(EFFORT) as [string, ...string[]];

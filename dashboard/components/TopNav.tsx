@@ -1,11 +1,12 @@
 'use client';
 import { usePathname } from 'next/navigation';
 import { useAgentState } from '../lib/useAgentState';
+import { PactControls } from './PactControls';
+import { WorkingIndicator } from './WorkingIndicator';
 
 const TABS = [
-  { href: '/deals', label: 'Deals' },
-  { href: '/console', label: 'Console' },
-  { href: '/portal', label: 'Portal' },
+  { href: '/deals', label: 'Deal' },
+  { href: '/pact', label: 'Pact' },
 ];
 
 export function TopNav() {
@@ -33,6 +34,8 @@ export function TopNav() {
         ))}
       </nav>
 
+      {agentUp && <WorkingIndicator />}
+      <PactControls compact />
       <div className="agent-status" data-ok={agentUp}>
         <span className="agent-status-dot" aria-hidden="true" />
         {agentUp ? 'Agent running' : 'Agent not running on :4000'}

@@ -1,6 +1,6 @@
 import type { z } from 'zod';
 import { db } from './store.js';
-import { profile } from './profiles.js';
+import { llmHeaders, profile } from './profiles.js';
 import { recordBlocked } from './counter.js';
 
 type Role = 'reasoning' | 'coding';
@@ -21,7 +21,7 @@ export const makeLlm = (skill: string) => {
   const note = (model: string, outcome: string) => record.run(Date.now(), skill, model, host, 'local', outcome);
   const post = async (path: string, body: object, ms: number) => {
     const res = await fetch(`${profile.url}${path}`, { method: 'POST', signal: AbortSignal.timeout(ms),
-      headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+      headers: llmHeaders(), body: JSON.stringify(body) });
     if (!res.ok) throw new Error(`${skill}: ollama ${res.status} ${await res.text()}`);
     return res;
   };
@@ -36,12 +36,12 @@ export const makeLlm = (skill: string) => {
   };
 
   return {
-    async json<S extends z.ZodTypeAny>(a: { role: Role; system: string; user: string; schema: S }): Promise<z.infer<S>> {
+    async json<S extends z.ZodTypeAny>(a: { role: Role; system: string; user: string; schema: S; timeoutMs?: number }): Promise<z.infer<S>> {
       const model = profile[a.role]; guard(model);
       const msgs = messages(a.system, a.user);
       for (let attempt = 0; attempt < 2; attempt++) { // one repair retry
         const res = await post('/api/chat', { model, messages: msgs, stream: false, think: false, // no `format`: Ollama 0.40 rejects it for qwen3.5 ('structured output is unavailable')
-          options: { temperature: 0 } }, 90_000);
+          options: { temperature: 0 } }, a.timeoutMs ?? 90_000);
         const text = stripThink((await res.json()).message.content).trim();
         const out = a.schema.safeParse(tryJson(text));
         if (out.success) { note(model, 'ok'); return out.data; }

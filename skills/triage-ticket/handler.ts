@@ -3,6 +3,7 @@
 import type { Ctx, Skill, SowLine, Ticket } from '@pact/core';
 import { must } from '@pact/core';
 import { TriageTicketOutput } from '../../prompts/triage-ticket/schema.js';
+import { estimateFor } from '../classify-request/handler.js';
 
 type Verdict = NonNullable<Ticket['verdict']>;
 const MIN_P = Number(process.env.PACT_DECIDE_MIN_P ?? 0.7);
@@ -16,7 +17,11 @@ export const handler: Skill<{ ticketId: string }, { verdict: Verdict }> = async 
   if (!sowLineId) {
     const r = reason ?? 'No SOW line covers this request.';
     ctx.store.updateTicket(ticketId, { status: 'triaged', verdict: 'change_request', reason: r });
-    ctx.log.info('Not in SOW, so it\'s a change request', { ticketId });
+    // A real change request, so the operator can approve or deny it (emailed by request-cr-approval).
+    const cr = ctx.store.createChangeRequest({ dealId: ticket.dealId, request: ticket.text, source: 'ticket', ticketId,
+      quote: { transcriptId: ticketId, t: 0, text: ticket.text }, estimate: await estimateFor(ticket.text, ctx) });
+    ctx.log.info('Not in SOW, so it\'s a change request', { ticketId, crId: cr.id });
+    await ctx.bus.emit('cr.drafted', { crId: cr.id });
     await ctx.bus.emit('ticket.triaged', { ticketId, verdict: 'change_request' });
     return { verdict: 'change_request' };
   }

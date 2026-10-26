@@ -76,7 +76,7 @@ describe('builder', () => {
     const b = store.createBuild({ dealId: 'd', kind: 'main', ref: 'aaa' });
     store.updateBuild(b.id, { status: 'ready' });
     await builder.runTests(b.id, ctx);
-    expect(store.latestTestRun(b.id)!.results).toEqual([{ testId: 't_1_1', pass: true }, { testId: 't_3_1', pass: false }]);
+    expect(store.latestTestRun(b.id)!.results).toEqual([{ testId: 't_1_1', pass: true }, { testId: 't_3_1', pass: false, error: 'no result from Playwright' }]);
     expect(store.getBuild(b.id)!.status).toBe('failed');
     expect(emitted.map((e) => e.topic)).toContain('build.failed');
     expect(calls).toContainEqual(['docker', 'rm', '-f', `runner-${b.id}`, `app-${b.id}`]);

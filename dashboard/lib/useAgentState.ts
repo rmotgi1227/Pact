@@ -39,6 +39,8 @@ function start() {
   refetch();
   const es = new EventSource(`${AGENT_URL}/stream`);
   es.onmessage = () => refetch(); // any event -> refetch /state; simplest correct option for a single-box demo
+  // Also poll while the agent is down (notice it coming back after Start) or busy (keep the activity timer honest).
+  setInterval(() => { if (!state || state.activity?.length) refetch(); }, 3000);
   // keep last good state on a transient stream error; refetch() above already guards agent-down
 }
 

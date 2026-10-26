@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 async function freshDb() {
   const { mkdtemp } = await import('node:fs/promises');
@@ -46,5 +46,29 @@ describe('bus', () => {
     await bus.publish('build.failed', {}, 'retry-id');
     await bus.publish('build.failed', {}, 'retry-id');
     expect(calls).toBe(2);
+  });
+});
+
+describe('bus restart', () => {
+  it('re-runs a skill that a previous process left half done, and only that one', async () => {
+    const { mkdtemp } = await import('node:fs/promises');
+    const { tmpdir } = await import('node:os');
+    const { join } = await import('node:path');
+    process.env.PACT_DB = join(await mkdtemp(join(tmpdir(), 'pact-resume-')), 'pact.db');
+    vi.resetModules();
+    const first = (await import('../bus.js')).bus;
+    first.subscribe('done', 'ticket.created', async () => {});
+    first.subscribe('stuck', 'ticket.created', () => new Promise(() => {})); // the process "dies" mid-skill
+    void first.publish('ticket.created', { ticketId: 't1' }, 'evt-1');
+    await new Promise((r) => setTimeout(r, 20));
+
+    vi.resetModules(); // a new process on the same database
+    const second = (await import('../bus.js')).bus;
+    const ran: string[] = [];
+    second.subscribe('done', 'ticket.created', async () => { ran.push('done'); });
+    second.subscribe('stuck', 'ticket.created', async (p) => { ran.push(`stuck:${p.ticketId}`); });
+    expect(second.resumeInterrupted()).toBe(1);
+    await new Promise((r) => setTimeout(r, 20));
+    expect(ran).toEqual(['stuck:t1']);
   });
 });

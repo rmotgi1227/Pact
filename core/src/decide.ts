@@ -1,7 +1,7 @@
 // Tev1-4B-experimental: picks one option from a state, a question and 2-24 lettered options,
 // and answers with a single letter. Used when "is this in scope?" is a choice, not writing.
 // See build-plan.md, Phase F2.
-import { profile } from './profiles.js';
+import { llmHeaders, profile } from './profiles.js';
 import { recordLocal } from './counter.js';
 
 export type Option = { key: string; label: string };
@@ -15,7 +15,7 @@ export const makeDecide = (skill: string) => ({
     const user = `State:\n${a.state}\n\nQuestion: ${a.question}\n\nOptions:\n` +
       opts.map((o, i) => `${LETTERS[i]}. ${o.label}`).join('\n') + '\n\nAnswer with one letter.';
     const res = await fetch(`${profile.decide.url}/chat/completions`, {
-      method: 'POST', headers: { 'content-type': 'application/json' }, signal: AbortSignal.timeout(15_000),
+      method: 'POST', headers: llmHeaders(), signal: AbortSignal.timeout(15_000),
       // Thinking must be off, or the model spends its 8-token budget thinking and returns no
       // letter (infra/decide/README.md). Ollama reads reasoning_effort; vLLM reads the
       // chat_template_kwargs flag. Harmless to send both no matter which server answers.

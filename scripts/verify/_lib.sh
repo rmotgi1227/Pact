@@ -18,6 +18,10 @@ ensure_agent() {
   fail "agent did not start (see /tmp/pact-agent.log)"
 }
 state() { curl -sf "$AGENT/state"; }
+# A shared link really opens for anyone: no error, and not bounced to a login page (Vercel deployment protection).
+opens() { local end; end=$(curl -sfL -o /dev/null -w '%{url_effective}' "$1") && [[ "$end" != *vercel.com/login* && "$end" != *vercel.com/sso-api* ]]; }
+# Read a file the agent wrote. With PACT_SANDBOX set (infra/sandbox/up.sh), the agent's files live inside the sandbox.
+readf() { if [ -n "${PACT_SANDBOX:-}" ]; then NODE_NO_WARNINGS=1 NEMOCLAW_NO_AUTO_AUDIT_LOGS=1 nemoclaw "$PACT_SANDBOX" exec --no-tty -- cat "$1" 2>/dev/null; else cat "$1"; fi; }
 action() { local body=${2:-'{}'}; curl -sf -X POST "$AGENT/actions/$1" -H 'content-type: application/json' -d "$body" >/dev/null || fail "action $1 failed"; }
 # wait_for '<jq boolean expr over /state>' <seconds> <description>
 wait_for() {
